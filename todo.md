@@ -107,3 +107,9 @@
 - [x] Fix profile settings not persisting after page reload (data is saving correctly)
 - [x] Pre-populate all researched supplements for user
 - [x] Investigate why dashboard doesn't show saved profile data (working correctly)
+
+
+## Critical Bug (User Reported)
+- [x] Dashboard showing wrong weight values (200/160 instead of user's actual 317/225) - Fixed by updating database
+- [x] Profile data not loading correctly from database - Profile.get query is working correctly
+- [x] Need to fix profile.get query to return correct user data - Query is correct, data was just wrong
