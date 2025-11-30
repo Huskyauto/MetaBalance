@@ -9,7 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
-  const { data: profile, isLoading: profileLoading } = trpc.profile.get.useQuery();
+  const { data: profile, isLoading: profileLoading } = trpc.profile.get.useQuery(undefined, {
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
   const { data: latestProgress } = trpc.progress.latest.useQuery();
   const { data: todayInsight } = trpc.insights.getToday.useQuery();
 

@@ -135,3 +135,6 @@
 - [x] SQL UPDATE commands were not taking effect - Used Drizzle ORM instead
 - [x] Database now correctly stores 317/225
 - [x] Verified update with affectedRows: 1, changedRows: 1
+- [x] Frontend still showing cached old values (200/160) even though DB has 317/225 - FIXED!
+- [x] tRPC cache not refreshing with new database values - Added refetchOnMount: 'always'
+- [x] Database successfully updated to 317/225 with Drizzle ORM
