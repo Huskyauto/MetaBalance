@@ -61,7 +61,7 @@ export default function Dashboard() {
 
       <div className="container py-8">
         {/* Daily Insight */}
-        {todayInsight && (
+        {todayInsight ? (
           <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
             <CardHeader>
               <CardTitle className="text-lg">Today's Insight</CardTitle>
@@ -70,7 +70,7 @@ export default function Dashboard() {
               <p className="text-sm">{todayInsight.content}</p>
             </CardContent>
           </Card>
-        )}
+        ) : null}
 
         {/* Progress Overview */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">

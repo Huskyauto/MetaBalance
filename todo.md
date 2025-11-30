@@ -113,3 +113,18 @@
 - [x] Dashboard showing wrong weight values (200/160 instead of user's actual 317/225) - Fixed by updating database
 - [x] Profile data not loading correctly from database - Profile.get query is working correctly
 - [x] Need to fix profile.get query to return correct user data - Query is correct, data was just wrong
+
+
+## Feature Request (User Reported)
+- [x] Add automatic profile updates - dashboard should refresh immediately when profile is edited (Already implemented)
+- [x] Implement cache invalidation for profile mutations (Already implemented in Profile.tsx line 70)
+- [x] Ensure all pages show updated profile data without manual refresh (Working correctly via tRPC invalidation)
+
+
+## Feature Request - Daily AI Insights
+- [x] Create backend procedure to generate personalized daily insights
+- [x] Integrate Grok API for contextual motivation and guidance
+- [x] Generate insights based on user's progress, habits, and metabolic profile
+- [x] Display daily insight prominently on dashboard
+- [x] Ensure insights are generated once per day (not on every page load)
+- [x] Include actionable advice and encouragement

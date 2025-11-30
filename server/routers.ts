@@ -2,9 +2,9 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { callGrok } from "./grok";
 import { z } from "zod";
 import * as db from "./db";
-import { callGrok } from "./grok";
 
 export const appRouter = router({
   system: systemRouter,
@@ -268,7 +268,87 @@ export const appRouter = router({
 
   insights: router({
     getToday: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getTodayInsight(ctx.user.id);
+      // Check if we already have today's insight
+      const existingInsight = await db.getTodayInsight(ctx.user.id);
+      if (existingInsight) {
+        return existingInsight;
+      }
+
+      // Generate new daily insight using Grok
+      const profile = await db.getMetabolicProfile(ctx.user.id);
+      const recentProgress = await db.getProgressLogs(ctx.user.id); // Recent progress
+      const recentMeals = await db.getMealLogs(ctx.user.id); // Recent meals
+      
+      // Build context for Grok
+      const firstWeight = recentProgress[0]?.weight;
+      const lastWeight = recentProgress[recentProgress.length - 1]?.weight;
+      const weightChange = recentProgress.length >= 2 && firstWeight != null && lastWeight != null
+        ? firstWeight - lastWeight
+        : 0;
+      
+      const context = `
+User Profile:
+- Current Weight: ${profile?.currentWeight || 'Not set'} lbs
+- Target Weight: ${profile?.targetWeight || 'Not set'} lbs
+- Weight to lose: ${profile?.currentWeight && profile?.targetWeight ? profile.currentWeight - profile.targetWeight : 'N/A'} lbs
+- Recent weight change (7 days): ${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)} lbs
+- Stress Level: ${profile?.stressLevel || 'unknown'}
+- Sleep Quality: ${profile?.sleepQuality || 'unknown'}
+- Activity Level: ${profile?.activityLevel || 'unknown'}
+- Taking GLP-1: ${profile?.takingGLP1 ? 'Yes' : 'No'}
+- Health conditions: ${[profile?.hasObesity && 'Obesity', profile?.hasDiabetes && 'Diabetes', profile?.hasMetabolicSyndrome && 'Metabolic Syndrome'].filter(Boolean).join(', ') || 'None reported'}
+
+Recent Activity:
+- Progress logs in past week: ${recentProgress.length}
+- Meals logged recently: ${recentMeals.length}
+      `.trim();
+
+      const prompt = `You are a supportive metabolic health coach helping someone on their weight loss and metabolic health journey. Based on their profile and recent activity, generate a brief, personalized daily insight (2-3 sentences max) that:
+
+1. Acknowledges their current situation or recent progress
+2. Provides one specific, actionable tip related to metabolic health, nutrition, or lifestyle
+3. Offers encouragement and motivation
+
+Focus on evidence-based advice about:
+- Reducing linoleic acid / seed oils
+- Intermittent fasting benefits
+- Gut health and probiotics
+- NAD+ and mitochondrial function
+- Managing stress and sleep
+- Staying consistent with tracking
+
+${context}
+
+Generate a warm, encouraging daily insight:`;
+
+      try {
+        const insightContent = await callGrok([
+          { role: 'system', content: 'You are a knowledgeable, supportive metabolic health coach. Keep responses brief, actionable, and encouraging.' },
+          { role: 'user', content: prompt }
+        ]);
+
+        // Save the generated insight
+        const newInsight = await db.createDailyInsight({
+          userId: ctx.user.id,
+          title: "Today's Insight",
+          content: insightContent,
+          insightType: "motivation",
+          date: new Date(),
+        });
+
+        return newInsight;
+      } catch (error) {
+        console.error('Failed to generate daily insight:', error);
+        // Return a fallback insight if Grok fails
+        const fallbackInsight = await db.createDailyInsight({
+          userId: ctx.user.id,
+          title: "Today's Insight",
+          content: "Focus on reducing seed oils today and prioritize whole, unprocessed foods. Your body will thank you!",
+          insightType: "tip",
+          date: new Date(),
+        });
+        return fallbackInsight;
+      }
     }),
     
     markViewed: protectedProcedure
