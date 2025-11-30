@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Meals from "./pages/Meals";
 import Fasting from "./pages/Fasting";
 import Chat from "./pages/Chat";
+import Profile from "./pages/Profile";
+import Progress from "./pages/Progress";
 
 function Router() {
   return (
@@ -20,8 +22,9 @@ function Router() {
       <Route path={"/meals"} component={Meals} />
       <Route path={"/fasting"} component={Fasting} />
       <Route path={"/chat"} component={Chat} />
+      <Route path={"/profile"} component={Profile} />
       <Route path={"/supplements"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Supplements</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
-      <Route path={"/progress"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Progress Tracking</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
+      <Route path={"/progress"} component={Progress} />
       <Route path={"/education"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Education</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

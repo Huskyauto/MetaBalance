@@ -80,3 +80,12 @@
 - [ ] Integration with fitness trackers
 - [ ] Telehealth consultations
 - [ ] Barcode scanner for food products
+
+
+## Bug Fixes & Improvements (User Reported)
+- [x] Add ability to edit current weight and target weight from dashboard
+- [x] Create profile/settings page for editing all user information
+- [x] Make dashboard weight cards clickable to edit
+- [x] Add quick weight update functionality
+- [x] Allow editing of all metabolic profile data (health conditions, medications, etc.)
+- [x] Add validation for weight/measurement updates

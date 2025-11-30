@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut } from "lucide-react";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -46,6 +46,10 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">Welcome, {user.name || "User"}</span>
+              <Button variant="ghost" size="sm" onClick={() => setLocation("/profile")}>
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
@@ -70,7 +74,7 @@ export default function Dashboard() {
 
         {/* Progress Overview */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setLocation("/profile")}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Current Weight</CardTitle>
             </CardHeader>
@@ -82,9 +86,10 @@ export default function Dashboard() {
                   {latestProgress?.weight || profile?.currentWeight || "--"} <span className="text-lg font-normal text-muted-foreground">lbs</span>
                 </div>
               )}
+              <p className="text-xs text-muted-foreground mt-2">Click to edit</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setLocation("/profile")}>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Target Weight</CardTitle>
             </CardHeader>
@@ -96,6 +101,7 @@ export default function Dashboard() {
                   {profile?.targetWeight || "--"} <span className="text-lg font-normal text-muted-foreground">lbs</span>
                 </div>
               )}
+              <p className="text-xs text-muted-foreground mt-2">Click to edit</p>
             </CardContent>
           </Card>
           <Card>
