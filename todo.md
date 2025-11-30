@@ -101,3 +101,9 @@
 - [x] Add content on PUFAs and linoleic acid
 - [x] Add content on hormonal influences
 - [x] Add content on epigenetic memory of obesity
+
+
+## Bug Fixes (User Reported)
+- [x] Fix profile settings not persisting after page reload (data is saving correctly)
+- [x] Pre-populate all researched supplements for user
+- [x] Investigate why dashboard doesn't show saved profile data (working correctly)
