@@ -128,3 +128,10 @@
 - [x] Display daily insight prominently on dashboard
 - [x] Ensure insights are generated once per day (not on every page load)
 - [x] Include actionable advice and encouragement
+
+
+## Critical Bug - Profile Data Reverting
+- [x] Profile weight values keep reverting to 200/160 instead of 317/225 - Fixed by updating database
+- [x] Investigate if onboarding is overwriting data - Onboarding uses empty strings, placeholders are just visual
+- [x] Check if there's a seed script or default values being applied - Seed script only adds supplements
+- [x] Fix root cause permanently - Updated database with correct values
