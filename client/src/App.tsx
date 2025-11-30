@@ -12,6 +12,8 @@ import Fasting from "./pages/Fasting";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import Progress from "./pages/Progress";
+import Supplements from "./pages/Supplements";
+import Education from "./pages/Education";
 
 function Router() {
   return (
@@ -23,9 +25,9 @@ function Router() {
       <Route path={"/fasting"} component={Fasting} />
       <Route path={"/chat"} component={Chat} />
       <Route path={"/profile"} component={Profile} />
-      <Route path={"/supplements"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Supplements</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
+      <Route path={"/supplements"} component={Supplements} />
       <Route path={"/progress"} component={Progress} />
-      <Route path={"/education"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Education</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
+      <Route path={"/education"} component={Education} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

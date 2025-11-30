@@ -89,3 +89,15 @@
 - [x] Add quick weight update functionality
 - [x] Allow editing of all metabolic profile data (health conditions, medications, etc.)
 - [x] Add validation for weight/measurement updates
+
+
+## New Feature Requests
+- [x] Build Supplements page with comprehensive library
+- [x] Add supplement tracker with dosage and timing
+- [x] Include evidence-based information for each supplement
+- [x] Build Education page with research articles
+- [x] Add content on cellular energy metabolism
+- [x] Add content on mitochondrial dysfunction
+- [x] Add content on PUFAs and linoleic acid
+- [x] Add content on hormonal influences
+- [x] Add content on epigenetic memory of obesity
