@@ -5,14 +5,25 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Onboarding from "./pages/Onboarding";
+import Dashboard from "./pages/Dashboard";
+import Meals from "./pages/Meals";
+import Fasting from "./pages/Fasting";
+import Chat from "./pages/Chat";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/onboarding"} component={Onboarding} />
+      <Route path={"/dashboard"} component={Dashboard} />
+      <Route path={"/meals"} component={Meals} />
+      <Route path={"/fasting"} component={Fasting} />
+      <Route path={"/chat"} component={Chat} />
+      <Route path={"/supplements"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Supplements</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
+      <Route path={"/progress"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Progress Tracking</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
+      <Route path={"/education"} component={() => <div className="min-h-screen flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-2">Education</h1><p className="text-muted-foreground">Coming soon</p></div></div>} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );

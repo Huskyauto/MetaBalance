@@ -1,0 +1,221 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function Dashboard() {
+  const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const { data: profile, isLoading: profileLoading } = trpc.profile.get.useQuery();
+  const { data: latestProgress } = trpc.progress.latest.useQuery();
+  const { data: todayInsight } = trpc.insights.getToday.useQuery();
+
+  if (!user) {
+    setLocation("/");
+    return null;
+  }
+
+  // If no profile, redirect to onboarding
+  if (!profileLoading && !profile) {
+    setLocation("/onboarding");
+    return null;
+  }
+
+  const handleLogout = () => {
+    logout();
+    setLocation("/");
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="container py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">MetaBalance</h1>
+                <p className="text-sm text-muted-foreground">Your Metabolic Health Journey</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">Welcome, {user.name || "User"}</span>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container py-8">
+        {/* Daily Insight */}
+        {todayInsight && (
+          <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-lg">Today's Insight</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">{todayInsight.content}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Progress Overview */}
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Current Weight</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {profileLoading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <div className="text-3xl font-bold">
+                  {latestProgress?.weight || profile?.currentWeight || "--"} <span className="text-lg font-normal text-muted-foreground">lbs</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Target Weight</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {profileLoading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <div className="text-3xl font-bold">
+                  {profile?.targetWeight || "--"} <span className="text-lg font-normal text-muted-foreground">lbs</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">To Go</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {profileLoading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <div className="text-3xl font-bold">
+                  {profile?.currentWeight && profile?.targetWeight
+                    ? Math.abs((latestProgress?.weight || profile.currentWeight) - profile.targetWeight)
+                    : "--"}{" "}
+                  <span className="text-lg font-normal text-muted-foreground">lbs</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Feature Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Link href="/meals">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <Apple className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Dietary Tracking</CardTitle>
+                    <CardDescription>Log meals & analyze oils</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/fasting">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Fasting Coach</CardTitle>
+                    <CardDescription>Track your fasting schedule</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/supplements">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                    <Pill className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Supplements</CardTitle>
+                    <CardDescription>Manage your supplements</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/progress">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-pink-100 flex items-center justify-center">
+                    <TrendingDown className="h-6 w-6 text-pink-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Progress Tracking</CardTitle>
+                    <CardDescription>View your journey</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/chat">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-teal-100 flex items-center justify-center">
+                    <MessageSquare className="h-6 w-6 text-teal-600" />
+                  </div>
+                  <div>
+                    <CardTitle>AI Coach</CardTitle>
+                    <CardDescription>Get personalized advice</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/education">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
+                    <BookOpen className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Education</CardTitle>
+                    <CardDescription>Learn about metabolic health</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
