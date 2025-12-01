@@ -138,3 +138,9 @@
 - [x] Frontend still showing cached old values (200/160) even though DB has 317/225 - FIXED!
 - [x] tRPC cache not refreshing with new database values - Added refetchOnMount: 'always'
 - [x] Database successfully updated to 317/225 with Drizzle ORM
+
+
+## User Request - Add Grok API Key
+- [ ] Request Grok API key from user via webdev_request_secrets
+- [ ] Test daily AI insights feature with provided API key
+- [ ] Verify AI Coach chat feature works with API key

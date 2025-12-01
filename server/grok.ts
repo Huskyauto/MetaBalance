@@ -37,7 +37,7 @@ export async function callGrok(messages: GrokMessage[]): Promise<string> {
     const response = await axios.post<GrokResponse>(
       GROK_API_URL,
       {
-        model: "grok-beta",
+        model: "grok-4-1-fast-non-reasoning",
         messages,
         temperature: 0.7,
         max_tokens: 1000,
