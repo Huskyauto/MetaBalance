@@ -47,6 +47,7 @@ export const appRouter = router({
         targetDate: z.date().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        console.log('[PROFILE UPDATE] User:', ctx.user.id, 'Data:', JSON.stringify(input));
         await db.upsertMetabolicProfile({
           userId: ctx.user.id,
           ...input,
