@@ -15,7 +15,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
-  const { data: profile, isLoading } = trpc.profile.get.useQuery();
+  const { data: profile, isLoading } = trpc.profile.get.useQuery(undefined, {
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
   const utils = trpc.useUtils();
 
   const [formData, setFormData] = useState({
