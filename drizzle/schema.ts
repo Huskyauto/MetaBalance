@@ -56,6 +56,13 @@ export const metabolicProfiles = mysqlTable("metabolic_profiles", {
   primaryGoal: text("primaryGoal"),
   targetDate: timestamp("targetDate"),
   
+  // Daily nutrition goals (calculated based on BMR/TDEE)
+  dailyCalorieGoal: int("dailyCalorieGoal"),
+  dailyProteinGoal: int("dailyProteinGoal"), // grams
+  dailyCarbsGoal: int("dailyCarbsGoal"), // grams
+  dailyFatsGoal: int("dailyFatsGoal"), // grams
+  dailyFiberGoal: int("dailyFiberGoal"), // grams
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

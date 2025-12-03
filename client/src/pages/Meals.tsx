@@ -54,6 +54,14 @@ export default function Meals() {
     }
   );
 
+  const { data: nutritionGoals } = trpc.profile.getNutritionGoals.useQuery(
+    undefined,
+    {
+      refetchOnMount: 'always',
+      staleTime: 0,
+    }
+  );
+
   // Mutations
   const createMeal = trpc.meals.create.useMutation({
     onSuccess: () => {
@@ -237,30 +245,114 @@ export default function Meals() {
         </div>
       </Card>
 
-      {/* Daily Nutrition Totals */}
-      {dailyTotals && (
+      {/* Daily Nutrition Totals with Goals */}
+      {dailyTotals && nutritionGoals && (
         <Card className="p-6 mb-6 bg-primary/5">
           <h3 className="text-lg font-semibold mb-4">Daily Totals</h3>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold">{dailyTotals.calories}</p>
-              <p className="text-sm text-muted-foreground">Calories</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {/* Calories */}
+            <div>
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-2xl font-bold">{dailyTotals.calories}</p>
+                <p className="text-sm text-muted-foreground">/ {nutritionGoals.dailyCalories}</p>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">Calories</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${
+                    (dailyTotals.calories / nutritionGoals.dailyCalories) > 1 
+                      ? 'bg-red-500' 
+                      : (dailyTotals.calories / nutritionGoals.dailyCalories) > 0.9 
+                      ? 'bg-yellow-500' 
+                      : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min((dailyTotals.calories / nutritionGoals.dailyCalories) * 100, 100)}%` }}
+                />
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{dailyTotals.protein}g</p>
-              <p className="text-sm text-muted-foreground">Protein</p>
+            
+            {/* Protein */}
+            <div>
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-2xl font-bold">{dailyTotals.protein}g</p>
+                <p className="text-sm text-muted-foreground">/ {nutritionGoals.dailyProtein}g</p>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">Protein</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${
+                    (dailyTotals.protein / nutritionGoals.dailyProtein) > 1 
+                      ? 'bg-red-500' 
+                      : (dailyTotals.protein / nutritionGoals.dailyProtein) > 0.9 
+                      ? 'bg-yellow-500' 
+                      : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min((dailyTotals.protein / nutritionGoals.dailyProtein) * 100, 100)}%` }}
+                />
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{dailyTotals.carbs}g</p>
-              <p className="text-sm text-muted-foreground">Carbs</p>
+            
+            {/* Carbs */}
+            <div>
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-2xl font-bold">{dailyTotals.carbs}g</p>
+                <p className="text-sm text-muted-foreground">/ {nutritionGoals.dailyCarbs}g</p>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">Carbs</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${
+                    (dailyTotals.carbs / nutritionGoals.dailyCarbs) > 1 
+                      ? 'bg-red-500' 
+                      : (dailyTotals.carbs / nutritionGoals.dailyCarbs) > 0.9 
+                      ? 'bg-yellow-500' 
+                      : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min((dailyTotals.carbs / nutritionGoals.dailyCarbs) * 100, 100)}%` }}
+                />
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{dailyTotals.fats}g</p>
-              <p className="text-sm text-muted-foreground">Fats</p>
+            
+            {/* Fats */}
+            <div>
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-2xl font-bold">{dailyTotals.fats}g</p>
+                <p className="text-sm text-muted-foreground">/ {nutritionGoals.dailyFats}g</p>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">Fats</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${
+                    (dailyTotals.fats / nutritionGoals.dailyFats) > 1 
+                      ? 'bg-red-500' 
+                      : (dailyTotals.fats / nutritionGoals.dailyFats) > 0.9 
+                      ? 'bg-yellow-500' 
+                      : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min((dailyTotals.fats / nutritionGoals.dailyFats) * 100, 100)}%` }}
+                />
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{dailyTotals.fiber}g</p>
-              <p className="text-sm text-muted-foreground">Fiber</p>
+            
+            {/* Fiber */}
+            <div>
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-2xl font-bold">{dailyTotals.fiber}g</p>
+                <p className="text-sm text-muted-foreground">/ {nutritionGoals.dailyFiber}g</p>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">Fiber</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${
+                    (dailyTotals.fiber / nutritionGoals.dailyFiber) > 1 
+                      ? 'bg-red-500' 
+                      : (dailyTotals.fiber / nutritionGoals.dailyFiber) > 0.9 
+                      ? 'bg-yellow-500' 
+                      : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min((dailyTotals.fiber / nutritionGoals.dailyFiber) * 100, 100)}%` }}
+                />
+              </div>
             </div>
           </div>
         </Card>

@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { callGrok } from "./grok";
 import { z } from "zod";
 import * as db from "./db";
+import { calculateNutritionGoals } from "./nutritionGoals";
 
 export const appRouter = router({
   system: systemRouter,
@@ -54,6 +55,33 @@ export const appRouter = router({
         });
         return { success: true };
       }),
+    
+    // Get personalized nutrition goals
+    getNutritionGoals: protectedProcedure.query(async ({ ctx }) => {
+      const profile = await db.getMetabolicProfile(ctx.user.id);
+      
+      if (!profile || !profile.currentWeight || !profile.height || !profile.age || !profile.gender || !profile.activityLevel) {
+        // Return default goals if profile is incomplete
+        return {
+          dailyCalories: 2000,
+          dailyProtein: 150,
+          dailyCarbs: 200,
+          dailyFats: 65,
+          dailyFiber: 30,
+        };
+      }
+      
+      // Calculate goals based on profile
+      const goals = calculateNutritionGoals({
+        currentWeight: profile.currentWeight,
+        height: profile.height,
+        age: profile.age,
+        gender: profile.gender,
+        activityLevel: profile.activityLevel,
+      });
+      
+      return goals;
+    }),
   }),
 
   meals: router({

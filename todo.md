@@ -158,3 +158,17 @@
 - [x] Create weekly analytics page with nutrition graphs (7-day trends)
 - [x] Add ability to review past days' meals
 - [x] Test complete workflow: select date → add meals to each section → view totals → review weekly trends
+
+
+## Daily Nutrition Goals (User Request - Dec 3, 2025)
+
+- [x] Calculate BMR using Mifflin-St Jeor equation (male, 312 lbs, 72 in, 61 years)
+- [x] Calculate TDEE with very active multiplier (exercise 7 days/week)
+- [x] Determine calorie deficit for weight loss (312 lbs → 225 lbs)
+- [x] Calculate macro goals: protein (1g/lb lean mass), fats (0.3-0.4g/lb), carbs (remainder)
+- [x] Add calculated goals to profile schema (dailyCalorieGoal, dailyProteinGoal, etc.)
+- [x] Create backend procedure to fetch/calculate daily nutrition goals
+- [x] Update Daily Totals card UI with progress bars showing current vs goal
+- [x] Add color coding: green (under goal), yellow (near goal), red (over goal)
+- [x] Display goals as "600 / 3395 cal" format with progress bar
+- [x] Test with user's actual profile data (312 lbs, 72 in, 61 years, very active)
