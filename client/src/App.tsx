@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import Progress from "./pages/Progress";
 import Supplements from "./pages/Supplements";
 import Education from "./pages/Education";
+import NutritionAnalytics from "./pages/NutritionAnalytics";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path={"/onboarding"} component={Onboarding} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/meals"} component={Meals} />
+      <Route path={"/nutrition-analytics"} component={NutritionAnalytics} />
       <Route path={"/fasting"} component={Fasting} />
       <Route path={"/chat"} component={Chat} />
       <Route path={"/profile"} component={Profile} />

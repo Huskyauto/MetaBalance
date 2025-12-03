@@ -57,26 +57,46 @@ export const appRouter = router({
   }),
 
   meals: router({
-    list: protectedProcedure
+    // Get meals for a specific date
+    getByDate: protectedProcedure
       .input(z.object({
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
+        date: z.date(), // Get meals for this specific day
       }))
       .query(async ({ ctx, input }) => {
-        return await db.getMealLogs(ctx.user.id, input.startDate, input.endDate);
+        return await db.getMealsByDate(ctx.user.id, input.date);
       }),
     
+    // Get daily nutrition totals for a specific date
+    getDailyTotals: protectedProcedure
+      .input(z.object({
+        date: z.date(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getDailyNutritionTotals(ctx.user.id, input.date);
+      }),
+    
+    // Get weekly nutrition data for graphs
+    getWeeklyData: protectedProcedure
+      .input(z.object({
+        startDate: z.date(),
+        endDate: z.date(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getWeeklyNutritionData(ctx.user.id, input.startDate, input.endDate);
+      }),
+    
+    // Create a new meal entry
     create: protectedProcedure
       .input(z.object({
         loggedAt: z.date(),
         mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]),
-        description: z.string(),
-        containsSoybeanOil: z.boolean().default(false),
-        containsCornOil: z.boolean().default(false),
-        containsSunflowerOil: z.boolean().default(false),
-        highLinoleicAcid: z.boolean().default(false),
-        isProcessedFood: z.boolean().default(false),
-        fiberContent: z.enum(["none", "low", "moderate", "high"]),
+        foodName: z.string(),
+        servingSize: z.string().optional(),
+        calories: z.number().optional(),
+        protein: z.number().optional(),
+        carbs: z.number().optional(),
+        fats: z.number().optional(),
+        fiber: z.number().optional(),
         notes: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -278,7 +298,10 @@ export const appRouter = router({
       // Generate new daily insight using Grok
       const profile = await db.getMetabolicProfile(ctx.user.id);
       const recentProgress = await db.getProgressLogs(ctx.user.id); // Recent progress
-      const recentMeals = await db.getMealLogs(ctx.user.id); // Recent meals
+      // Get recent meals from the last 7 days
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const recentMeals = await db.getWeeklyNutritionData(ctx.user.id, sevenDaysAgo, new Date());
       
       // Build context for Grok
       const firstWeight = recentProgress[0]?.weight;

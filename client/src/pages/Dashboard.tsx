@@ -138,7 +138,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <CardTitle>Dietary Tracking</CardTitle>
-                    <CardDescription>Log meals & analyze oils</CardDescription>
+                    <CardDescription>Log meals & view nutrition analytics</CardDescription>
                   </div>
                 </div>
               </CardHeader>

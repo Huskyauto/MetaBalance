@@ -64,26 +64,25 @@ export type MetabolicProfile = typeof metabolicProfiles.$inferSelect;
 export type InsertMetabolicProfile = typeof metabolicProfiles.$inferInsert;
 
 /**
- * Dietary tracking - logs meals and analyzes nutritional content
+ * Dietary tracking - logs meals with comprehensive nutrition data
  */
 export const mealLogs = mysqlTable("meal_logs", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   
   loggedAt: timestamp("loggedAt").notNull(), // UTC timestamp
-  mealType: mysqlEnum("mealType", ["breakfast", "lunch", "dinner", "snack"]),
+  mealType: mysqlEnum("mealType", ["breakfast", "lunch", "dinner", "snack"]).notNull(),
   
-  description: text("description").notNull(),
+  // Food details
+  foodName: varchar("foodName", { length: 255 }).notNull(),
+  servingSize: varchar("servingSize", { length: 100 }), // e.g., "1 cup", "100g", "1 medium"
   
-  // Oil/fat analysis
-  containsSoybeanOil: boolean("containsSoybeanOil").default(false),
-  containsCornOil: boolean("containsCornOil").default(false),
-  containsSunflowerOil: boolean("containsSunflowerOil").default(false),
-  highLinoleicAcid: boolean("highLinoleicAcid").default(false),
-  
-  // Nutritional flags
-  isProcessedFood: boolean("isProcessedFood").default(false),
-  fiberContent: mysqlEnum("fiberContent", ["none", "low", "moderate", "high"]),
+  // Macronutrients
+  calories: int("calories"), // kcal
+  protein: int("protein"), // grams
+  carbs: int("carbs"), // grams
+  fats: int("fats"), // grams
+  fiber: int("fiber"), // grams
   
   // Notes
   notes: text("notes"),

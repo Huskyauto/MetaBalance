@@ -135,21 +135,76 @@ export async function createMealLog(meal: InsertMealLog) {
   await db.insert(mealLogs).values(meal);
 }
 
-export async function getMealLogs(userId: number, startDate?: Date, endDate?: Date) {
+export async function getMealsByDate(userId: number, date: Date) {
   const db = await getDb();
   if (!db) return [];
   
-  let conditions = [eq(mealLogs.userId, userId)];
-  
-  if (startDate && endDate) {
-    conditions.push(gte(mealLogs.loggedAt, startDate));
-    conditions.push(lte(mealLogs.loggedAt, endDate));
-  }
+  // Get start and end of the day in UTC
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
   
   const result = await db.select().from(mealLogs)
-    .where(and(...conditions))
-    .orderBy(desc(mealLogs.loggedAt));
+    .where(and(
+      eq(mealLogs.userId, userId),
+      gte(mealLogs.loggedAt, startOfDay),
+      lte(mealLogs.loggedAt, endOfDay)
+    ))
+    .orderBy(mealLogs.loggedAt);
+  
   return result;
+}
+
+export async function getDailyNutritionTotals(userId: number, date: Date) {
+  const db = await getDb();
+  if (!db) return { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 };
+  
+  const meals = await getMealsByDate(userId, date);
+  
+  const totals = meals.reduce((acc, meal) => {
+    return {
+      calories: acc.calories + (meal.calories || 0),
+      protein: acc.protein + (meal.protein || 0),
+      carbs: acc.carbs + (meal.carbs || 0),
+      fats: acc.fats + (meal.fats || 0),
+      fiber: acc.fiber + (meal.fiber || 0),
+    };
+  }, { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 });
+  
+  return totals;
+}
+
+export async function getWeeklyNutritionData(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(mealLogs)
+    .where(and(
+      eq(mealLogs.userId, userId),
+      gte(mealLogs.loggedAt, startDate),
+      lte(mealLogs.loggedAt, endDate)
+    ))
+    .orderBy(mealLogs.loggedAt);
+  
+  // Group by date and calculate daily totals
+  const dailyData = new Map<string, { date: string; calories: number; protein: number; carbs: number; fats: number; fiber: number }>();
+  
+  result.forEach(meal => {
+    const dateKey = meal.loggedAt.toISOString().split('T')[0];
+    const existing = dailyData.get(dateKey) || { date: dateKey, calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 };
+    
+    dailyData.set(dateKey, {
+      date: dateKey,
+      calories: existing.calories + (meal.calories || 0),
+      protein: existing.protein + (meal.protein || 0),
+      carbs: existing.carbs + (meal.carbs || 0),
+      fats: existing.fats + (meal.fats || 0),
+      fiber: existing.fiber + (meal.fiber || 0),
+    });
+  });
+  
+  return Array.from(dailyData.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export async function deleteMealLog(id: number, userId: number) {

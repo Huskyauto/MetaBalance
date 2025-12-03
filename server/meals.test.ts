@@ -32,21 +32,21 @@ function createAuthContext(): TrpcContext {
 }
 
 describe("meals.create", () => {
-  it("creates a meal with valid data", async () => {
+  it("creates a meal with nutrition data", async () => {
     const ctx = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.meals.create({
       loggedAt: new Date(),
       mealType: "breakfast",
-      description: "Oatmeal with berries",
-      containsSoybeanOil: false,
-      containsCornOil: false,
-      containsSunflowerOil: false,
-      highLinoleicAcid: false,
-      isProcessedFood: false,
-      fiberContent: "high",
-      notes: "Felt great after this meal",
+      foodName: "Oatmeal with berries",
+      servingSize: "1 cup",
+      calories: 300,
+      protein: 10,
+      carbs: 50,
+      fats: 5,
+      fiber: 8,
+      notes: "Delicious and filling",
     });
 
     expect(result.success).toBe(true);
@@ -64,24 +64,55 @@ describe("meals.create", () => {
       caller.meals.create({
         loggedAt: new Date(),
         mealType: "breakfast",
-        description: "Test meal",
-        containsSoybeanOil: false,
-        containsCornOil: false,
-        containsSunflowerOil: false,
-        highLinoleicAcid: false,
-        isProcessedFood: false,
-        fiberContent: "moderate",
+        foodName: "Test meal",
+        calories: 100,
       })
     ).rejects.toThrow();
   });
 });
 
-describe("meals.list", () => {
-  it("returns an array of meals", async () => {
+describe("meals.getByDate", () => {
+  it("returns meals for a specific date", async () => {
     const ctx = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
-    const result = await caller.meals.list({});
+    const today = new Date();
+    const result = await caller.meals.getByDate({ date: today });
+    expect(Array.isArray(result)).toBe(true);
+  });
+});
+
+describe("meals.getDailyTotals", () => {
+  it("calculates daily nutrition totals", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const today = new Date();
+    const totals = await caller.meals.getDailyTotals({ date: today });
+    
+    expect(totals).toHaveProperty("calories");
+    expect(totals).toHaveProperty("protein");
+    expect(totals).toHaveProperty("carbs");
+    expect(totals).toHaveProperty("fats");
+    expect(totals).toHaveProperty("fiber");
+    expect(typeof totals.calories).toBe("number");
+  });
+});
+
+describe("meals.getWeeklyData", () => {
+  it("returns weekly nutrition data", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const today = new Date();
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const result = await caller.meals.getWeeklyData({
+      startDate: weekAgo,
+      endDate: today,
+    });
+
     expect(Array.isArray(result)).toBe(true);
   });
 });

@@ -144,3 +144,17 @@
 - [ ] Request Grok API key from user via webdev_request_secrets
 - [ ] Test daily AI insights feature with provided API key
 - [ ] Verify AI Coach chat feature works with API key
+
+
+## Dietary Tracking Complete Redesign (User Request - Dec 3, 2025)
+
+- [x] Update meal_logs schema: add calories, protein, carbs, fats, foodName, servingSize
+- [x] Remove old oil-tracking boolean fields (containsSoybeanOil, containsCornOil, etc.)
+- [x] Keep fiber and notes fields
+- [x] Create daily meal view organized by meal type (Breakfast, Lunch, Dinner, Snacks)
+- [x] Add date picker to navigate between days
+- [x] Calculate and display daily nutrition totals (calories, protein, carbs, fats, fiber)
+- [x] Build proper meal entry form with food name, serving size, and macros
+- [x] Create weekly analytics page with nutrition graphs (7-day trends)
+- [x] Add ability to review past days' meals
+- [x] Test complete workflow: select date → add meals to each section → view totals → review weekly trends
