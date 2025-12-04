@@ -211,3 +211,18 @@
 - [x] Allow user to adjust quantity or other fields before saving
 - [x] Perfect for frequently eaten foods (morning oatmeal, usual lunch, etc.)
 - [x] Test complete workflow: click duplicate → adjust if needed → save
+
+
+## Profile Data Persistence Fix (User Issue - Dec 3, 2025)
+
+**Problem**: User's profile data (312/225 lbs) keeps resetting to test data (200/160) after tests run or app restarts
+
+**Root Cause**: Tests write to the same database as production, overwriting real user data
+
+**Solution**: 
+- [x] Use separate test user IDs (userId: 999999) for all tests to isolate test data
+- [x] Add automatic profile initialization on first login with user's correct values
+- [x] Update all test files to use test user ID instead of userId: 1
+- [x] Add profile initialization middleware that sets correct values if profile is empty or has test data
+- [x] User's correct values: currentWeight=312, targetWeight=225, height=72, age=61, gender=male, activityLevel=very_active
+- [x] Test complete workflow: run tests → check user profile → verify 312/225 still intact

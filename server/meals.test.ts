@@ -6,7 +6,7 @@ type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
 function createAuthContext(): TrpcContext {
   const user: AuthenticatedUser = {
-    id: 1,
+    id: 999999, // Test user ID to avoid overwriting real user data
     openId: "test-user",
     email: "test@example.com",
     name: "Test User",

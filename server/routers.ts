@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { calculateNutritionGoals } from "./nutritionGoals";
 import { autocompleteIngredients, getIngredientNutrition } from "./spoonacular";
+import { ensureProfileInitialized, getOwnerProfileDefaults } from "./profileInit";
 
 export const appRouter = router({
   system: systemRouter,
@@ -23,6 +24,10 @@ export const appRouter = router({
 
   profile: router({
     get: protectedProcedure.query(async ({ ctx }) => {
+      // Initialize profile with correct values for owner only (not test users)
+      if (ctx.user.id === 1) {
+        await ensureProfileInitialized(ctx.user.id, getOwnerProfileDefaults());
+      }
       return await db.getMetabolicProfile(ctx.user.id);
     }),
     
