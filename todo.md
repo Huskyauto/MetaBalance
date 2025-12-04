@@ -186,3 +186,11 @@
 - [x] Manual entry still available if user wants to type custom values
 - [x] Test complete workflow: search → select → auto-fill → save
 - [x] Write tests for Spoonacular API integration
+
+
+## Navigation Issues (User Reported - Dec 3, 2025)
+
+- [x] Add back button to Dietary Tracking page header
+- [x] Add back button to Nutrition Analytics page header
+- [x] Verify all feature pages have back buttons (Fasting, Supplements, Progress, AI Coach, Education - all already have them)
+- [x] Ensure consistent navigation across all pages

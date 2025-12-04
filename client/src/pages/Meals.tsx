@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, Trash2, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react";
+import { CalendarIcon, Plus, Trash2, ChevronLeft, ChevronRight, BarChart3, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -237,18 +237,30 @@ export default function Meals() {
 
   return (
     <div className="container py-8 max-w-4xl">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Dietary Tracking</h1>
-          <p className="text-muted-foreground">
-            Track your daily meals and monitor your nutrition
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => window.location.href = '/nutrition-analytics'}>
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.href = '/'}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          <Button variant="outline" onClick={() => window.location.href = '/nutrition-analytics'}>
           <BarChart3 className="h-4 w-4 mr-2" />
           Weekly Analytics
         </Button>
       </div>
+      
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold mb-2">Dietary Tracking</h1>
+        <p className="text-muted-foreground">
+          Track your daily meals and monitor your nutrition
+        </p>
+      </div>
+    </div>
 
       {/* Date Navigation */}
       <Card className="p-6 mb-6">

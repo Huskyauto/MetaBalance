@@ -2,7 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import {
   LineChart,
@@ -62,6 +62,15 @@ export default function NutritionAnalytics() {
   return (
     <div className="container py-8 max-w-6xl">
       <div className="mb-8">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => window.location.href = '/meals'}
+          className="gap-2 mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dietary Tracking
+        </Button>
         <h1 className="text-3xl font-bold mb-2">Nutrition Analytics</h1>
         <p className="text-muted-foreground">
           Track your weekly nutrition trends and patterns
