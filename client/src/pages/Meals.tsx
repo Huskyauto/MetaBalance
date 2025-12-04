@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus, Trash2, ChevronLeft, ChevronRight, BarChart3, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, ArrowLeft, BarChart3, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -29,6 +30,7 @@ export default function Meals() {
   const [formData, setFormData] = useState({
     foodName: "",
     servingSize: "",
+    quantity: "1",
     calories: "",
     protein: "",
     carbs: "",
@@ -126,6 +128,7 @@ export default function Meals() {
     setFormData({
       foodName: "",
       servingSize: "",
+      quantity: "1",
       calories: "",
       protein: "",
       carbs: "",
@@ -146,22 +149,40 @@ export default function Meals() {
       return;
     }
 
+    const quantity = parseInt(formData.quantity) || 1;
+    
     createMeal.mutate({
       loggedAt: new Date(selectedDate),
       mealType: selectedMealType,
       foodName: formData.foodName,
       servingSize: formData.servingSize || undefined,
-      calories: formData.calories ? parseInt(formData.calories) : undefined,
-      protein: formData.protein ? parseInt(formData.protein) : undefined,
-      carbs: formData.carbs ? parseInt(formData.carbs) : undefined,
-      fats: formData.fats ? parseInt(formData.fats) : undefined,
-      fiber: formData.fiber ? parseInt(formData.fiber) : undefined,
+      calories: formData.calories ? parseInt(formData.calories) * quantity : undefined,
+      protein: formData.protein ? parseInt(formData.protein) * quantity : undefined,
+      carbs: formData.carbs ? parseInt(formData.carbs) * quantity : undefined,
+      fats: formData.fats ? parseInt(formData.fats) * quantity : undefined,
+      fiber: formData.fiber ? parseInt(formData.fiber) * quantity : undefined,
       notes: formData.notes || undefined,
     });
   };
 
   const openAddDialog = (mealType: MealType) => {
     setSelectedMealType(mealType);
+    setIsAddDialogOpen(true);
+  };
+
+  const duplicateMeal = (meal: any, mealType: MealType) => {
+    setSelectedMealType(mealType);
+    setFormData({
+      foodName: meal.foodName,
+      servingSize: meal.servingSize || "",
+      quantity: "1",
+      calories: meal.calories?.toString() || "",
+      protein: meal.protein?.toString() || "",
+      carbs: meal.carbs?.toString() || "",
+      fats: meal.fats?.toString() || "",
+      fiber: meal.fiber?.toString() || "",
+      notes: meal.notes || "",
+    });
     setIsAddDialogOpen(true);
   };
 
@@ -221,13 +242,24 @@ export default function Meals() {
                   <p className="text-sm text-muted-foreground mt-2">{meal.notes}</p>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => deleteMeal.mutate({ id: meal.id })}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => duplicateMeal(meal, mealType)}
+                  title="Log again"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => deleteMeal.mutate({ id: meal.id })}
+                  title="Delete"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -480,14 +512,40 @@ export default function Meals() {
               )}
             </div>
 
-            <div>
-              <Label htmlFor="servingSize">Serving Size</Label>
-              <Input
-                id="servingSize"
-                value={formData.servingSize}
-                onChange={(e) => setFormData({ ...formData, servingSize: e.target.value })}
-                placeholder="e.g., 1 cup, 100g, 1 medium"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="servingSize">Serving Size</Label>
+                <Input
+                  id="servingSize"
+                  value={formData.servingSize}
+                  onChange={(e) => setFormData({ ...formData, servingSize: e.target.value })}
+                  placeholder="e.g., 1 cup, 100g"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="quantity">Quantity</Label>
+                <Select
+                  value={formData.quantity}
+                  onValueChange={(value) => setFormData({ ...formData, quantity: value })}
+                >
+                  <SelectTrigger id="quantity">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 serving</SelectItem>
+                    <SelectItem value="2">2 servings</SelectItem>
+                    <SelectItem value="3">3 servings</SelectItem>
+                    <SelectItem value="4">4 servings</SelectItem>
+                    <SelectItem value="5">5 servings</SelectItem>
+                    <SelectItem value="6">6 servings</SelectItem>
+                    <SelectItem value="7">7 servings</SelectItem>
+                    <SelectItem value="8">8 servings</SelectItem>
+                    <SelectItem value="9">9 servings</SelectItem>
+                    <SelectItem value="10">10 servings</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

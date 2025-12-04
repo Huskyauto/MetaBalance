@@ -194,3 +194,20 @@
 - [x] Add back button to Nutrition Analytics page header
 - [x] Verify all feature pages have back buttons (Fasting, Supplements, Progress, AI Coach, Education - all already have them)
 - [x] Ensure consistent navigation across all pages
+
+
+## Serving Quantity Dropdown (User Request - Dec 3, 2025)
+
+- [x] Add serving quantity dropdown to meal entry form (1, 2, 3, 4, 5, etc.)
+- [x] Implement automatic nutrition multiplication based on quantity selected
+- [x] Update form to show: Food Name, Serving Size (e.g., "100g"), Quantity (dropdown)
+- [x] Calculate final nutrition values: base nutrition × quantity
+- [x] Test with multiple quantities and verify daily totals update correctly
+
+## Quick Re-log / Duplicate Meal (User Request - Dec 3, 2025)
+
+- [x] Add "Log Again" (Copy icon) button to each meal entry card
+- [x] When clicked, open meal entry dialog with all fields pre-filled from that meal
+- [x] Allow user to adjust quantity or other fields before saving
+- [x] Perfect for frequently eaten foods (morning oatmeal, usual lunch, etc.)
+- [x] Test complete workflow: click duplicate → adjust if needed → save
