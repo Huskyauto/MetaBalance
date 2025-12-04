@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings } from "lucide-react";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -219,6 +219,22 @@ export default function Dashboard() {
                   <div>
                     <CardTitle>Education</CardTitle>
                     <CardDescription>Learn about metabolic health</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/research">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <FlaskConical className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Weight Loss Research</CardTitle>
+                    <CardDescription>Latest scientific findings</CardDescription>
                   </div>
                 </div>
               </CardHeader>

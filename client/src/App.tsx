@@ -15,6 +15,7 @@ import Progress from "./pages/Progress";
 import Supplements from "./pages/Supplements";
 import Education from "./pages/Education";
 import NutritionAnalytics from "./pages/NutritionAnalytics";
+import WeightLossResearch from "./pages/WeightLossResearch";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
       <Route path={"/supplements"} component={Supplements} />
       <Route path={"/progress"} component={Progress} />
       <Route path={"/education"} component={Education} />
+      <Route path={"/research"} component={WeightLossResearch} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

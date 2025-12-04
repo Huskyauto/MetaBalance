@@ -515,6 +515,59 @@ Be supportive, motivational, and practical in your responses.`;
       return { success: true };
     }),
   }),
+
+  research: router({
+    getLatestResearch: publicProcedure.query(async () => {
+      // Generate comprehensive research content using Grok API
+      // Execute all Grok API calls in parallel for faster loading
+      const [overview, glp1, fasting, nutrition, exercise, metabolic] = await Promise.all([
+        // Overview
+        callGrok([
+          { role: 'system', content: 'You are a medical research expert specializing in obesity and metabolic health. Provide accurate, evidence-based information.' },
+          { role: 'user', content: `Provide a comprehensive overview of the latest weight loss research from 2024-2025. Include major breakthroughs, emerging trends in obesity treatment, most effective evidence-based strategies, and important clinical trials. Format with clear sections and bullet points. Be specific about studies and findings. Keep response under 800 words.` }
+        ]),
+        
+        // GLP-1 Research
+        callGrok([
+          { role: 'system', content: 'You are a medical research expert. Provide accurate, evidence-based information about GLP-1 medications.' },
+          { role: 'user', content: `Provide detailed information about GLP-1 medications for weight loss (2024-2025): Semaglutide (Ozempic, Wegovy), Tirzepatide (Mounjaro, Zepbound), emerging drugs (orforglipron, MariTide), real-world effectiveness vs clinical trials, side effects, and WHO guidelines. Include specific weight loss percentages. Keep under 800 words.` }
+        ]),
+        
+        // Fasting Research
+        callGrok([
+          { role: 'system', content: 'You are a nutrition science expert. Provide evidence-based information about intermittent fasting.' },
+          { role: 'user', content: `Summarize latest research on intermittent fasting and time-restricted eating (2024-2025): Different protocols (16:8, ADF, 5:2), metabolic benefits, autophagy, weight loss effectiveness, cardiovascular considerations, optimal eating windows, and comparison to continuous calorie restriction. Include recent clinical trials. Keep under 800 words.` }
+        ]),
+        
+        // Nutrition Science
+        callGrok([
+          { role: 'system', content: 'You are a nutrition science expert. Provide evidence-based dietary recommendations.' },
+          { role: 'user', content: `Provide latest research on nutrition strategies for weight loss: Low-carb vs low-fat diets, Mediterranean diet, protein intake, fiber and gut health, seed oils and linoleic acid concerns, whole foods vs processed foods, calorie quality vs quantity. Include specific recommendations. Keep under 800 words.` }
+        ]),
+        
+        // Exercise Research
+        callGrok([
+          { role: 'system', content: 'You are an exercise science expert. Provide evidence-based exercise recommendations.' },
+          { role: 'user', content: `Summarize latest research on exercise for weight loss: Resistance training vs cardio, HIIT, exercise timing and fasted training, muscle preservation during weight loss, exercise and appetite regulation, minimum effective dose. Include practical recommendations. Keep under 800 words.` }
+        ]),
+        
+        // Metabolic Health
+        callGrok([
+          { role: 'system', content: 'You are a metabolic health researcher. Provide detailed information about cellular mechanisms.' },
+          { role: 'user', content: `Provide latest research on metabolic health and obesity: Mitochondrial dysfunction and reductive stress, NAD+ and cellular energy, insulin resistance mechanisms, epigenetic memory of obesity, gut microbiome and metabolism, inflammation, sleep and circadian rhythms. Include cutting-edge research. Keep under 800 words.` }
+        ]),
+      ]);
+
+      return {
+        overview,
+        glp1,
+        fasting,
+        nutrition,
+        exercise,
+        metabolic,
+      };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
