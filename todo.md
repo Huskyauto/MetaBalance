@@ -172,3 +172,17 @@
 - [x] Add color coding: green (under goal), yellow (near goal), red (over goal)
 - [x] Display goals as "600 / 3395 cal" format with progress bar
 - [x] Test with user's actual profile data (312 lbs, 72 in, 61 years, very active)
+
+
+## Spoonacular Food API Integration (User Request - Dec 3, 2025)
+
+- [x] Request Spoonacular API key from user
+- [x] Store API key in environment variables (SPOONACULAR_API_KEY)
+- [x] Create backend service to search foods via Spoonacular API
+- [x] Add autocomplete search input to meal entry dialog
+- [x] Fetch nutrition data when user selects a food from search results
+- [x] Auto-fill calories, protein, carbs, fats, fiber fields
+- [x] Handle serving size conversions (100g, 1 cup, etc.)
+- [x] Manual entry still available if user wants to type custom values
+- [x] Test complete workflow: search → select → auto-fill → save
+- [x] Write tests for Spoonacular API integration

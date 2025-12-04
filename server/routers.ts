@@ -6,6 +6,7 @@ import { callGrok } from "./grok";
 import { z } from "zod";
 import * as db from "./db";
 import { calculateNutritionGoals } from "./nutritionGoals";
+import { autocompleteIngredients, getIngredientNutrition } from "./spoonacular";
 
 export const appRouter = router({
   system: systemRouter,
@@ -140,6 +141,29 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         await db.deleteMealLog(input.id, ctx.user.id);
         return { success: true };
+      }),
+  }),
+
+  food: router({
+    // Search for foods using Spoonacular API
+    search: protectedProcedure
+      .input(z.object({
+        query: z.string(),
+        limit: z.number().optional().default(10),
+      }))
+      .query(async ({ input }) => {
+        return await autocompleteIngredients(input.query, input.limit);
+      }),
+    
+    // Get nutrition data for a specific food
+    getNutrition: protectedProcedure
+      .input(z.object({
+        ingredientId: z.number(),
+        amount: z.number().optional().default(100),
+        unit: z.string().optional().default("g"),
+      }))
+      .query(async ({ input }) => {
+        return await getIngredientNutrition(input.ingredientId, input.amount, input.unit);
       }),
   }),
 

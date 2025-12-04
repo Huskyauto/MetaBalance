@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,6 +36,44 @@ export default function Meals() {
     fiber: "",
     notes: "",
   });
+
+  // Food search state
+  const [foodSearchQuery, setFoodSearchQuery] = useState("");
+  const [selectedFoodId, setSelectedFoodId] = useState<number | null>(null);
+  const [showFoodResults, setShowFoodResults] = useState(false);
+
+  // Food search query
+  const { data: foodResults = [] } = trpc.food.search.useQuery(
+    { query: foodSearchQuery, limit: 10 },
+    {
+      enabled: foodSearchQuery.length >= 2,
+      staleTime: 60000, // Cache for 1 minute
+    }
+  );
+
+  // Get nutrition data when food is selected
+  const { data: nutritionData, isLoading: isLoadingNutrition } = trpc.food.getNutrition.useQuery(
+    { ingredientId: selectedFoodId!, amount: 100, unit: "g" },
+    {
+      enabled: selectedFoodId !== null,
+    }
+  );
+
+  // Auto-fill nutrition fields when data is loaded
+  useEffect(() => {
+    if (nutritionData) {
+      setFormData(prev => ({
+        ...prev,
+        calories: nutritionData.calories.toString(),
+        protein: nutritionData.protein.toString(),
+        carbs: nutritionData.carbs.toString(),
+        fats: nutritionData.fat.toString(),
+        fiber: nutritionData.fiber.toString(),
+        servingSize: "100g",
+      }));
+      toast.success("Nutrition data loaded!");
+    }
+  }, [nutritionData]);
 
   // Queries
   const { data: meals = [], isLoading } = trpc.meals.getByDate.useQuery(
@@ -95,6 +133,9 @@ export default function Meals() {
       fiber: "",
       notes: "",
     });
+    setFoodSearchQuery("");
+    setSelectedFoodId(null);
+    setShowFoodResults(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -380,15 +421,51 @@ export default function Meals() {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+            <div className="relative">
               <Label htmlFor="foodName">Food Name *</Label>
               <Input
                 id="foodName"
                 value={formData.foodName}
-                onChange={(e) => setFormData({ ...formData, foodName: e.target.value })}
-                placeholder="e.g., Grilled chicken breast"
+                onChange={(e) => {
+                  setFormData({ ...formData, foodName: e.target.value });
+                  setFoodSearchQuery(e.target.value);
+                  setShowFoodResults(true);
+                }}
+                onFocus={() => setShowFoodResults(true)}
+                placeholder="Search for food... (e.g., chicken breast)"
                 required
               />
+              
+              {/* Food search results dropdown */}
+              {showFoodResults && foodSearchQuery.length >= 2 && foodResults.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {foodResults.map((food) => (
+                    <button
+                      key={food.id}
+                      type="button"
+                      className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                      onClick={() => {
+                        setFormData({ ...formData, foodName: food.name });
+                        setSelectedFoodId(food.id);
+                        setShowFoodResults(false);
+                      }}
+                    >
+                      {food.image && (
+                        <img 
+                          src={`https://spoonacular.com/cdn/ingredients_100x100/${food.image}`} 
+                          alt={food.name}
+                          className="w-8 h-8 object-cover rounded"
+                        />
+                      )}
+                      <span>{food.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {isLoadingNutrition && (
+                <p className="text-sm text-gray-500 mt-1">Loading nutrition data...</p>
+              )}
             </div>
 
             <div>
