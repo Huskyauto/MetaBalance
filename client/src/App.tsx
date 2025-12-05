@@ -16,6 +16,7 @@ import Supplements from "./pages/Supplements";
 import Education from "./pages/Education";
 import NutritionAnalytics from "./pages/NutritionAnalytics";
 import WeightLossResearch from "./pages/WeightLossResearch";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 function Router() {
   return (
@@ -53,6 +54,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <PWAInstallPrompt />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -27,6 +27,14 @@ MetaBalance is a comprehensive web application designed to help individuals achi
   - Exercise and physical activity research
   - Metabolic health and cellular mechanisms
 
+### Progressive Web App (PWA)
+- **Installable** - Add to home screen on mobile and desktop devices
+- **Offline Support** - Access core features without internet connection
+- **App-like Experience** - Standalone mode with native app feel
+- **Smart Caching** - Automatic caching of assets and API responses
+- **Install Prompt** - Friendly prompt to install the app
+- **Background Sync** - Sync data when connection is restored
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -37,6 +45,7 @@ MetaBalance is a comprehensive web application designed to help individuals achi
 - **Wouter** - Lightweight routing
 - **tRPC** - End-to-end typesafe APIs
 - **TanStack Query** - Data fetching and caching
+- **Vite PWA** - Progressive Web App support with Workbox
 
 ### Backend
 - **Node.js 22** - JavaScript runtime
