@@ -243,3 +243,14 @@
 - [x] Create 6 research tabs: Overview, GLP-1 Drugs, Fasting, Nutrition, Exercise, Metabolic
 - [x] Optimize with parallel API calls for faster loading
 - [x] Add medical disclaimer
+
+
+## GitHub Repository Setup (User Request - Dec 3, 2025)
+
+- [ ] Create new GitHub repository named "MetaBalance"
+- [ ] Initialize git in project directory
+- [ ] Create .gitignore file for node_modules, .env, etc.
+- [ ] Add all project files to git
+- [ ] Push to GitHub repository
+- [ ] Verify all files uploaded successfully
+- [ ] Provide repository URL to user
