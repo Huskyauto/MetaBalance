@@ -10,7 +10,8 @@ import {
   supplementLogs, InsertSupplementLog,
   progressLogs, InsertProgressLog,
   dailyInsights, InsertDailyInsight,
-  chatMessages, InsertChatMessage
+  chatMessages, InsertChatMessage,
+  researchContent, InsertResearchContent
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -454,4 +455,73 @@ export async function clearChatHistory(userId: number) {
   if (!db) throw new Error("Database not available");
   
   await db.delete(chatMessages).where(eq(chatMessages.userId, userId));
+}
+
+
+// ===== RESEARCH CONTENT FUNCTIONS =====
+
+export async function saveResearchContent(content: InsertResearchContent) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(researchContent).values(content);
+}
+
+export async function getResearchHistory(
+  userId: number, 
+  category?: 'overview' | 'glp1' | 'fasting' | 'nutrition' | 'exercise' | 'metabolic',
+  limit: number = 10
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let query = db.select().from(researchContent)
+    .where(eq(researchContent.userId, userId))
+    .orderBy(desc(researchContent.generatedAt))
+    .limit(limit);
+  
+  if (category) {
+    query = db.select().from(researchContent)
+      .where(and(
+        eq(researchContent.userId, userId),
+        eq(researchContent.category, category)
+      ))
+      .orderBy(desc(researchContent.generatedAt))
+      .limit(limit);
+  }
+  
+  return await query;
+}
+
+export async function getLatestResearchByCategory(userId: number, category: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(researchContent)
+    .where(and(
+      eq(researchContent.userId, userId),
+      eq(researchContent.category, category as any)
+    ))
+    .orderBy(desc(researchContent.generatedAt))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function markResearchViewed(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(researchContent)
+    .set({ viewed: true, viewedAt: new Date() })
+    .where(and(eq(researchContent.id, id), eq(researchContent.userId, userId)));
+}
+
+export async function toggleResearchBookmark(id: number, userId: number, bookmarked: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(researchContent)
+    .set({ bookmarked })
+    .where(and(eq(researchContent.id, id), eq(researchContent.userId, userId)));
 }

@@ -281,3 +281,17 @@
 - [x] Update index.html with favicon and apple-touch-icon links
 - [x] Test icon display on mobile and desktop
 - [x] Save checkpoint with new icon design
+
+
+## Research Content Database (User Request - Dec 3, 2025)
+
+- [x] Design database schema for storing research content
+- [x] Create `research_content` table with fields: id, category, content, generatedAt, userId, viewed, viewedAt, bookmarked
+- [x] Add database migration via SQL (created table directly)
+- [x] Create backend procedures to save research content
+- [x] Create backend procedures to retrieve research history
+- [x] Update research router to automatically save all content to database
+- [x] Add getHistory procedure to retrieve past research generations
+- [x] Test complete workflow: generate research → auto-save to DB → retrieve history
+- [x] Write vitest tests for research storage (8 tests, all passing)
+- [x] Save checkpoint with automatic research database feature

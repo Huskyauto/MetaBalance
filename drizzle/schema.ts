@@ -266,3 +266,24 @@ export const chatMessages = mysqlTable("chat_messages", {
 
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = typeof chatMessages.$inferInsert;
+
+/**
+ * Research content - stores Grok-generated weight loss research
+ */
+export const researchContent = mysqlTable("research_content", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  category: mysqlEnum("category", ["overview", "glp1", "fasting", "nutrition", "exercise", "metabolic"]).notNull(),
+  content: text("content").notNull(), // Markdown content from Grok
+  
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+  
+  // Optional metadata
+  viewed: boolean("viewed").default(false),
+  viewedAt: timestamp("viewedAt"),
+  bookmarked: boolean("bookmarked").default(false),
+});
+
+export type ResearchContent = typeof researchContent.$inferSelect;
+export type InsertResearchContent = typeof researchContent.$inferInsert;

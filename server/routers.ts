@@ -517,7 +517,7 @@ Be supportive, motivational, and practical in your responses.`;
   }),
 
   research: router({
-    getLatestResearch: publicProcedure.query(async () => {
+    getLatestResearch: protectedProcedure.query(async ({ ctx }) => {
       // Generate comprehensive research content using Grok API
       // Execute all Grok API calls in parallel for faster loading
       const [overview, glp1, fasting, nutrition, exercise, metabolic] = await Promise.all([
@@ -558,6 +558,19 @@ Be supportive, motivational, and practical in your responses.`;
         ]),
       ]);
 
+      // Automatically save all generated research to database
+      const userId = ctx.user.id;
+      const now = new Date();
+      
+      await Promise.all([
+        db.saveResearchContent({ userId, category: 'overview', content: overview, generatedAt: now }),
+        db.saveResearchContent({ userId, category: 'glp1', content: glp1, generatedAt: now }),
+        db.saveResearchContent({ userId, category: 'fasting', content: fasting, generatedAt: now }),
+        db.saveResearchContent({ userId, category: 'nutrition', content: nutrition, generatedAt: now }),
+        db.saveResearchContent({ userId, category: 'exercise', content: exercise, generatedAt: now }),
+        db.saveResearchContent({ userId, category: 'metabolic', content: metabolic, generatedAt: now }),
+      ]);
+
       return {
         overview,
         glp1,
@@ -567,6 +580,15 @@ Be supportive, motivational, and practical in your responses.`;
         metabolic,
       };
     }),
+    
+    getHistory: protectedProcedure
+      .input(z.object({ 
+        category: z.enum(['overview', 'glp1', 'fasting', 'nutrition', 'exercise', 'metabolic']).optional(),
+        limit: z.number().default(10) 
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getResearchHistory(ctx.user.id, input.category, input.limit);
+      }),
   }),
 });
 
