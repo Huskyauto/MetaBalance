@@ -578,3 +578,11 @@
 - [x] Verify research router and database queries (getLatestResearch exists but wasn't called)
 - [x] Fix the issue - added automatic fallback to getLatestResearch when cache is empty
 - [x] Updated loading messages to show generation progress
+
+
+## Publish Failure Investigation (Dec 7, 2025)
+
+- [ ] Check production build for errors
+- [ ] Verify all dependencies are compatible
+- [ ] Check if it's a platform issue vs code issue
+- [ ] Test build locally to isolate problem
