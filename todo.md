@@ -426,3 +426,12 @@
 - [x] Add celebration message for perfect days (5 stars)
 - [x] Write comprehensive vitest tests (11 tests, all passing)
 - [x] Test complete workflow and save checkpoint
+
+
+## Automatic GitHub Sync (User Request - Dec 6, 2025)
+
+- [ ] Create post-commit git hook to automatically push to GitHub
+- [ ] Configure hook to push to both origin (Manus) and github remotes
+- [ ] Test automatic sync with a sample commit
+- [ ] Document the automatic sync setup in README
+- [ ] Save checkpoint with automatic sync enabled
