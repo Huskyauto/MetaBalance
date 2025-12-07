@@ -603,3 +603,12 @@
 - [ ] DEFERRED: User-specific push notifications (current API only supports owner notifications)
 
 **Note:** The notification preferences UI is complete and functional. Users can set their preferences, which are saved to the database. Implementing actual push notifications requires additional infrastructure (service workers, push subscriptions, background jobs) that would be better suited for a future enhancement phase.
+
+
+## Navigation Bug Fix (Dec 7, 2025)
+
+**Missing Profile Link:**
+- [x] Investigate why Profile link is missing from Dashboard (only accessible via Current Weight card)
+- [x] Add Profile navigation link back to Dashboard (added Health Profile card to feature grid)
+- [x] Ensure both Profile (health settings) and Settings (notifications) are accessible
+- [x] Test navigation flow (all 45 tests passing)
