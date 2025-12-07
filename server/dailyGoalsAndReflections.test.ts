@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import * as db from "./db";
 
 describe("Daily Goals & Weekly Reflections", () => {
-  const testUserId = 999999; // Isolated test user
+  let testUserId: number; // Isolated test user
   
   // Use random dates for each test run to ensure complete isolation
   const randomOffset = Math.floor(Math.random() * 1000) + 1000;
@@ -12,6 +12,23 @@ describe("Daily Goals & Weekly Reflections", () => {
     date.setHours(0, 0, 0, 0);
     return date;
   };
+  
+  beforeAll(async () => {
+    // Create test user if it doesn't exist (required for foreign key constraint)
+    await db.upsertUser({
+      openId: 'test-goals-user-999999',
+      name: 'Test Goals User',
+      email: 'test-goals@example.com',
+      loginMethod: 'test',
+      role: 'user',
+      lastSignedIn: new Date(),
+    });
+    
+    // Get the actual user ID
+    const user = await db.getUserByOpenId('test-goals-user-999999');
+    if (!user) throw new Error('Failed to create test user');
+    testUserId = user.id;
+  });
 
   describe("Daily Goals", () => {
     it("should create daily goal with correct win score", async () => {

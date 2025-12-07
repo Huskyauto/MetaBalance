@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import * as db from "./db";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -32,8 +33,27 @@ function createTestContext(userId: number): TrpcContext {
 }
 
 describe("Profile Initialization", () => {
-  it("does not overwrite test user profiles (user ID 999999)", async () => {
-    const ctx = createTestContext(999999);
+  let testUserId: number;
+  
+  beforeAll(async () => {
+    // Create test user (required for foreign key constraint)
+    await db.upsertUser({
+      openId: 'test-profileinit-user-999999',
+      name: 'Test ProfileInit User',
+      email: 'test-profileinit@example.com',
+      loginMethod: 'test',
+      role: 'user',
+      lastSignedIn: new Date(),
+    });
+    
+    // Get the actual user ID
+    const user = await db.getUserByOpenId('test-profileinit-user-999999');
+    if (!user) throw new Error('Failed to create test user');
+    testUserId = user.id;
+  });
+  
+  it("does not overwrite test user profiles", async () => {
+    const ctx = createTestContext(testUserId);
     const caller = appRouter.createCaller(ctx);
 
     // First, create a test profile with specific values

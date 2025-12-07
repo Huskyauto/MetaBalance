@@ -512,6 +512,59 @@
 
 ## Documentation Update (Dec 6, 2025)
 
-- [ ] Check if README.md includes latest engagement features
-- [ ] Update README.md with Interactive Daily Wins, Progress Charts, Streak Tracking
-- [ ] Commit and push documentation updates to GitHub
+- [x] Check if README.md includes latest engagement features (missing)
+- [x] Update README.md with Interactive Daily Wins, Progress Charts, Streak Tracking
+- [x] Commit and push documentation updates to GitHub (commit d465aa0)
+
+
+## Grok's Recommendations (Dec 7, 2025)
+
+### Immediate Priority (1-2 Days)
+
+**Schema Completion:**
+- [x] Add foreign key constraints (userId references users.id on all 12 tables with CASCADE delete)
+- [x] Add indexes for performance (14 indexes on frequently queried columns)
+- [x] Drop and recreate database with new schema
+- [x] Update all tests to work with foreign key constraints
+- [ ] Change weight/nutrition fields from int to decimal(5,2) for precision - DEFERRED: Breaking change
+- [ ] Add units enum to profiles (imperial/metric) - DEFERRED: Future enhancement
+
+**Backend Improvements:**
+- [ ] Add database transactions for multi-step operations (e.g., meal log + goal completion) - DEFERRED: Not critical for current scale
+- [ ] Replace console.error with TRPCError for proper error handling - DEFERRED: Working fine for now
+- [ ] Add pagination with offset/limit to getRecentReflections and getProgressLogs - DEFERRED: Not needed yet
+- [ ] Add rate limiting to prevent API abuse (100 req/min per user) - DEFERRED: Future enhancement
+
+**Frontend Verification:**
+- [ ] Add Suspense boundaries with Skeleton components for loading states
+- [ ] Verify all routes are properly wired in App.tsx
+- [ ] Test PWA offline functionality
+
+### Short-Term (3-7 Days)
+
+**AI/Integrations:**
+- [ ] Add streaming support for Grok AI responses
+- [ ] Implement retry logic with exponential backoff for API calls
+- [ ] Add dynamic prompts incorporating streak data
+
+**Performance:**
+- [ ] Use SQL GROUP BY for weekly aggregations instead of Map/reduce
+- [ ] Add user timezone preference to profile
+- [ ] Implement LRU cache for frequently accessed data
+
+### Long-Term (1-4 Weeks)
+
+**Security/Compliance:**
+- [ ] Add express-rate-limit middleware
+- [ ] Encrypt sensitive health fields
+- [ ] Create audit logs table for compliance
+
+**Testing & CI:**
+- [ ] Expand test coverage to 70%+
+- [ ] Add Playwright E2E tests
+- [ ] Set up GitHub Actions CI/CD pipeline
+
+**Scalability:**
+- [ ] Deploy to production infrastructure (Railway/PM2)
+- [ ] Add monitoring (Sentry/Datadog)
+- [ ] Implement analytics for retention tracking

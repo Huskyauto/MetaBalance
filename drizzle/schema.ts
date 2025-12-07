@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, index, uniqueIndex } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, index, uniqueIndex, foreignKey } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -23,7 +23,7 @@ export type InsertUser = typeof users.$inferInsert;
  */
 export const metabolicProfiles = mysqlTable("metabolic_profiles", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   // Basic metrics (in US units)
   currentWeight: int("currentWeight"), // pounds
@@ -65,7 +65,9 @@ export const metabolicProfiles = mysqlTable("metabolic_profiles", {
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("metabolic_profiles_userId_idx").on(table.userId),
+}));
 
 export type MetabolicProfile = typeof metabolicProfiles.$inferSelect;
 export type InsertMetabolicProfile = typeof metabolicProfiles.$inferInsert;
@@ -75,7 +77,7 @@ export type InsertMetabolicProfile = typeof metabolicProfiles.$inferInsert;
  */
 export const mealLogs = mysqlTable("meal_logs", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   loggedAt: timestamp("loggedAt").notNull(), // UTC timestamp
   mealType: mysqlEnum("mealType", ["breakfast", "lunch", "dinner", "snack"]).notNull(),
@@ -95,7 +97,11 @@ export const mealLogs = mysqlTable("meal_logs", {
   notes: text("notes"),
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("meal_logs_userId_idx").on(table.userId),
+  loggedAtIdx: index("meal_logs_loggedAt_idx").on(table.loggedAt),
+  userDateIdx: index("meal_logs_user_date_idx").on(table.userId, table.loggedAt),
+}));
 
 export type MealLog = typeof mealLogs.$inferSelect;
 export type InsertMealLog = typeof mealLogs.$inferInsert;
@@ -105,7 +111,7 @@ export type InsertMealLog = typeof mealLogs.$inferInsert;
  */
 export const fastingSchedules = mysqlTable("fasting_schedules", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   fastingType: mysqlEnum("fastingType", ["adf", "tre", "wdf"]).notNull(), // Alternate Day, Time-Restricted, Whole Day
   
@@ -132,8 +138,8 @@ export type InsertFastingSchedule = typeof fastingSchedules.$inferInsert;
  */
 export const fastingLogs = mysqlTable("fasting_logs", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  scheduleId: int("scheduleId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  scheduleId: int("scheduleId").notNull().references(() => fastingSchedules.id, { onDelete: "cascade" }),
   
   date: timestamp("date").notNull(), // Date of the fast
   adhered: boolean("adhered").notNull(), // Did they stick to the plan?
@@ -155,7 +161,7 @@ export type InsertFastingLog = typeof fastingLogs.$inferInsert;
  */
 export const supplements = mysqlTable("supplements", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   name: varchar("name", { length: 255 }).notNull(),
   type: mysqlEnum("type", ["berberine", "probiotic", "nmn", "resveratrol", "other"]).notNull(),
@@ -182,8 +188,8 @@ export type InsertSupplement = typeof supplements.$inferInsert;
  */
 export const supplementLogs = mysqlTable("supplement_logs", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  supplementId: int("supplementId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  supplementId: int("supplementId").notNull().references(() => supplements.id, { onDelete: "cascade" }),
   
   takenAt: timestamp("takenAt").notNull(), // UTC timestamp
   adhered: boolean("adhered").notNull(),
@@ -201,7 +207,7 @@ export type InsertSupplementLog = typeof supplementLogs.$inferInsert;
  */
 export const progressLogs = mysqlTable("progress_logs", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   loggedAt: timestamp("loggedAt").notNull(), // UTC timestamp
   
@@ -224,7 +230,11 @@ export const progressLogs = mysqlTable("progress_logs", {
   notes: text("notes"),
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("progress_logs_userId_idx").on(table.userId),
+  loggedAtIdx: index("progress_logs_loggedAt_idx").on(table.loggedAt),
+  userDateIdx: index("progress_logs_user_date_idx").on(table.userId, table.loggedAt),
+}));
 
 export type ProgressLog = typeof progressLogs.$inferSelect;
 export type InsertProgressLog = typeof progressLogs.$inferInsert;
@@ -234,7 +244,7 @@ export type InsertProgressLog = typeof progressLogs.$inferInsert;
  */
 export const dailyInsights = mysqlTable("daily_insights", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   date: timestamp("date").notNull(),
   
@@ -256,7 +266,7 @@ export type InsertDailyInsight = typeof dailyInsights.$inferInsert;
  */
 export const chatMessages = mysqlTable("chat_messages", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   role: mysqlEnum("role", ["user", "assistant"]).notNull(),
   content: text("content").notNull(),
@@ -272,7 +282,7 @@ export type InsertChatMessage = typeof chatMessages.$inferInsert;
  */
 export const researchContent = mysqlTable("research_content", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   category: mysqlEnum("category", ["overview", "glp1", "fasting", "nutrition", "exercise", "metabolic"]).notNull(),
   content: text("content").notNull(), // Markdown content from Grok
@@ -293,7 +303,7 @@ export type InsertResearchContent = typeof researchContent.$inferInsert;
  */
 export const dailyGoals = mysqlTable("daily_goals", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   date: timestamp("date").notNull(), // Date for this goal set
   
@@ -309,7 +319,11 @@ export const dailyGoals = mysqlTable("daily_goals", {
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("daily_goals_userId_idx").on(table.userId),
+  dateIdx: index("daily_goals_date_idx").on(table.date),
+  userDateIdx: index("daily_goals_user_date_idx").on(table.userId, table.date),
+}));
 
 export type DailyGoal = typeof dailyGoals.$inferSelect;
 export type InsertDailyGoal = typeof dailyGoals.$inferInsert;
@@ -319,7 +333,7 @@ export type InsertDailyGoal = typeof dailyGoals.$inferInsert;
  */
 export const weeklyReflections = mysqlTable("weekly_reflections", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   weekStartDate: timestamp("weekStartDate").notNull(), // Monday of the week
   weekEndDate: timestamp("weekEndDate").notNull(), // Sunday of the week
@@ -338,7 +352,11 @@ export const weeklyReflections = mysqlTable("weekly_reflections", {
   weightChange: int("weightChange"), // Weight change in pounds (can be negative)
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("weekly_reflections_userId_idx").on(table.userId),
+  weekStartIdx: index("weekly_reflections_weekStart_idx").on(table.weekStartDate),
+  userWeekIdx: index("weekly_reflections_user_week_idx").on(table.userId, table.weekStartDate),
+}));
 
 export type WeeklyReflection = typeof weeklyReflections.$inferSelect;
 export type InsertWeeklyReflection = typeof weeklyReflections.$inferInsert;

@@ -1,15 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import * as db from "./db";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
-function createAuthContext(): TrpcContext {
+let testUserId: number;
+
+async function createAuthContext(): Promise<TrpcContext> {
   const user: AuthenticatedUser = {
-    id: 999999, // Test user ID to avoid overwriting real user data
-    openId: "test-user",
-    email: "test@example.com",
-    name: "Test User",
+    id: testUserId,
+    openId: "test-meals-user",
+    email: "test-meals@example.com",
+    name: "Test Meals User",
     loginMethod: "manus",
     role: "user",
     createdAt: new Date(),
@@ -32,8 +35,25 @@ function createAuthContext(): TrpcContext {
 }
 
 describe("meals.create", () => {
+  beforeAll(async () => {
+    // Create test user (required for foreign key constraint)
+    await db.upsertUser({
+      openId: 'test-meals-user',
+      name: 'Test Meals User',
+      email: 'test-meals@example.com',
+      loginMethod: 'test',
+      role: 'user',
+      lastSignedIn: new Date(),
+    });
+    
+    // Get the actual user ID
+    const user = await db.getUserByOpenId('test-meals-user');
+    if (!user) throw new Error('Failed to create test user');
+    testUserId = user.id;
+  });
+  
   it("creates a meal with nutrition data", async () => {
-    const ctx = createAuthContext();
+    const ctx = await createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.meals.create({
@@ -73,7 +93,7 @@ describe("meals.create", () => {
 
 describe("meals.getByDate", () => {
   it("returns meals for a specific date", async () => {
-    const ctx = createAuthContext();
+    const ctx = await createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
     const today = new Date();
@@ -84,7 +104,7 @@ describe("meals.getByDate", () => {
 
 describe("meals.getDailyTotals", () => {
   it("calculates daily nutrition totals", async () => {
-    const ctx = createAuthContext();
+    const ctx = await createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
     const today = new Date();
@@ -101,7 +121,7 @@ describe("meals.getDailyTotals", () => {
 
 describe("meals.getWeeklyData", () => {
   it("returns weekly nutrition data", async () => {
-    const ctx = createAuthContext();
+    const ctx = await createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
     const today = new Date();

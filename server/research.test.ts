@@ -2,9 +2,24 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import * as db from './db';
 
 describe('Research Content Storage', () => {
-  const testUserId = 999999; // Test user ID to avoid interfering with real data
+  let testUserId: number; // Test user ID to avoid interfering with real data
   
   beforeAll(async () => {
+    // Create test user if it doesn't exist (required for foreign key constraint)
+    await db.upsertUser({
+      openId: 'test-research-user-999999',
+      name: 'Test Research User',
+      email: 'test-research@example.com',
+      loginMethod: 'test',
+      role: 'user',
+      lastSignedIn: new Date(),
+    });
+    
+    // Get the actual user ID
+    const user = await db.getUserByOpenId('test-research-user-999999');
+    if (!user) throw new Error('Failed to create test user');
+    testUserId = user.id;
+    
     // Clean up any existing test research content
     const history = await db.getResearchHistory(testUserId, undefined, 100);
     console.log(`[TEST SETUP] Found ${history.length} existing test research entries`);
