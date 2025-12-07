@@ -586,3 +586,20 @@
 - [ ] Verify all dependencies are compatible
 - [ ] Check if it's a platform issue vs code issue
 - [ ] Test build locally to isolate problem
+
+
+## Push Notifications Feature (Dec 7, 2025)
+
+**Notification Preferences:**
+- [x] Add notification settings to user profile schema (enabled, reminderTime, streakAlerts)
+- [x] Create notification settings UI in Settings page
+- [x] Add time picker for preferred reminder time
+- [x] Create Settings page and add to navigation
+
+**Notification System (Simplified):**
+- [x] UI foundation complete - settings saved to database
+- [ ] Full push notification system requires: Browser Push API, service worker, subscription storage
+- [ ] DEFERRED: Cron-based scheduling system (requires background job infrastructure)
+- [ ] DEFERRED: User-specific push notifications (current API only supports owner notifications)
+
+**Note:** The notification preferences UI is complete and functional. Users can set their preferences, which are saved to the database. Implementing actual push notifications requires additional infrastructure (service workers, push subscriptions, background jobs) that would be better suited for a future enhancement phase.

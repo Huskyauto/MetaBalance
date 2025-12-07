@@ -52,6 +52,11 @@ export const appRouter = router({
         poorGutHealth: z.boolean().optional(),
         primaryGoal: z.string().optional(),
         targetDate: z.date().optional(),
+        // Notification preferences
+        notificationsEnabled: z.boolean().optional(),
+        dailyReminderTime: z.string().optional(),
+        streakAlertsEnabled: z.boolean().optional(),
+        milestoneAlertsEnabled: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         console.log('[PROFILE UPDATE] User:', ctx.user.id, 'Data:', JSON.stringify(input));

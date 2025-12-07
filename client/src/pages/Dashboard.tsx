@@ -53,7 +53,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">Welcome, {user.name || "User"}</span>
-              <Button variant="ghost" size="sm" onClick={() => setLocation("/profile")}>
+              <Button variant="ghost" size="sm" onClick={() => setLocation("/settings")}>
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>

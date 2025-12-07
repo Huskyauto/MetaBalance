@@ -63,6 +63,12 @@ export const metabolicProfiles = mysqlTable("metabolic_profiles", {
   dailyFatsGoal: int("dailyFatsGoal"), // grams
   dailyFiberGoal: int("dailyFiberGoal"), // grams
   
+  // Notification preferences
+  notificationsEnabled: boolean("notificationsEnabled").default(true),
+  dailyReminderTime: varchar("dailyReminderTime", { length: 5 }), // HH:MM format (e.g., "09:00")
+  streakAlertsEnabled: boolean("streakAlertsEnabled").default(true),
+  milestoneAlertsEnabled: boolean("milestoneAlertsEnabled").default(true),
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({

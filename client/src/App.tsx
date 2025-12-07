@@ -17,6 +17,7 @@ import Education from "./pages/Education";
 import NutritionAnalytics from "./pages/NutritionAnalytics";
 import WeightLossResearch from "./pages/WeightLossResearch";
 import WeeklyReflection from "./pages/WeeklyReflection";
+import Settings from "./pages/Settings";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 function Router() {
@@ -35,6 +36,7 @@ function Router() {
       <Route path={"/education"} component={Education} />
       <Route path={"/research"} component={WeightLossResearch} />
       <Route path={"/reflection"} component={WeeklyReflection} />
+      <Route path={"/settings"} component={Settings} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
