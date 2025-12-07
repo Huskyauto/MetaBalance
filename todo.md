@@ -568,3 +568,13 @@
 - [ ] Deploy to production infrastructure (Railway/PM2)
 - [ ] Add monitoring (Sentry/Datadog)
 - [ ] Implement analytics for retention tracking
+
+
+## Bug Fix (Dec 7, 2025)
+
+**Research Loading Issue:**
+- [x] Diagnose why weight loss research is not loading (cache empty after DB reset)
+- [x] Check server logs for errors (no errors, just empty cache)
+- [x] Verify research router and database queries (getLatestResearch exists but wasn't called)
+- [x] Fix the issue - added automatic fallback to getLatestResearch when cache is empty
+- [x] Updated loading messages to show generation progress

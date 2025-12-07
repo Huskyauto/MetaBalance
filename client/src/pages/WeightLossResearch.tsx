@@ -144,15 +144,27 @@ export default function WeightLossResearch() {
     { staleTime: 1000 * 60 * 60 }
   );
   
+  // If no cached research, generate fresh research
+  const { data: freshResearch, isLoading: loadingFresh } = trpc.research.getLatestResearch.useQuery(
+    undefined,
+    { 
+      enabled: !loadingCache && (!cachedResearch || cachedResearch.length === 0),
+      staleTime: 1000 * 60 * 60 * 24 // Cache for 24 hours
+    }
+  );
+  
   // Convert cached research array to object by category (get most recent for each)
-  const researchData = cachedResearch?.reduce((acc: any, item: any) => {
+  const cachedData = cachedResearch?.reduce((acc: any, item: any) => {
     if (!acc[item.category]) {
       acc[item.category] = item.content;
     }
     return acc;
   }, {} as Record<string, string>) || {};
   
-  const isLoading = loadingCache;
+  // Use cached data if available, otherwise use fresh research
+  const researchData = Object.keys(cachedData).length > 0 ? cachedData : freshResearch || {};
+  
+  const isLoading = loadingCache || loadingFresh;
 
   if (isLoading) {
     return (
@@ -170,8 +182,12 @@ export default function WeightLossResearch() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">Loading research from database...</p>
-              <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
+              <p className="text-gray-600 font-medium">
+                {loadingFresh ? "Generating latest research..." : "Loading research from database..."}
+              </p>
+              <p className="text-gray-500 text-sm mt-2">
+                {loadingFresh ? "This may take 10-20 seconds as we compile the latest findings" : "This should only take a moment"}
+              </p>
             </div>
           </div>
         </div>
