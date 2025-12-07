@@ -1,11 +1,137 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, BookOpen, TrendingUp, Pill, Clock, Utensils, Activity } from "lucide-react";
+import { ArrowLeft, Loader2, BookOpen, TrendingUp, Pill, Clock, Utensils, Activity, History } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
+
+// Research History Component
+function ResearchHistory() {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const { data: history, isLoading } = trpc.research.getHistory.useQuery({
+    category: selectedCategory === "all" ? undefined : selectedCategory as any,
+    limit: 20
+  });
+
+  const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels: Record<string, string> = {
+      overview: "Overview",
+      glp1: "GLP-1 Drugs",
+      fasting: "Fasting",
+      nutrition: "Nutrition",
+      exercise: "Exercise",
+      metabolic: "Metabolic"
+    };
+    return labels[category] || category;
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      overview: "emerald",
+      glp1: "purple",
+      fasting: "blue",
+      nutrition: "orange",
+      exercise: "red",
+      metabolic: "teal"
+    };
+    return colors[category] || "gray";
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading research history...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-gray-200 bg-white/80 backdrop-blur">
+        <CardHeader>
+          <CardTitle className="text-2xl text-gray-900">Research History</CardTitle>
+          <CardDescription>
+            View your past research generations and track how findings evolve over time
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Category Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Filter by category:</span>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="all">All Categories</option>
+              <option value="overview">Overview</option>
+              <option value="glp1">GLP-1 Drugs</option>
+              <option value="fasting">Fasting</option>
+              <option value="nutrition">Nutrition</option>
+              <option value="exercise">Exercise</option>
+              <option value="metabolic">Metabolic</option>
+            </select>
+          </div>
+
+          {/* History List */}
+          {!history || history.length === 0 ? (
+            <div className="text-center py-12">
+              <History className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No research history yet</p>
+              <p className="text-sm text-gray-400 mt-1">Generate research to start building your history</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {history.map((entry: any) => {
+                const color = getCategoryColor(entry.category);
+                return (
+                  <Card key={entry.id} className={`border-${color}-200 hover:shadow-md transition-shadow`}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2 py-0.5 bg-${color}-100 text-${color}-700 text-xs font-medium rounded`}>
+                              {getCategoryLabel(entry.category)}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(entry.generatedAt)}
+                            </span>
+                          </div>
+                          <CardDescription className="text-sm line-clamp-2">
+                            {entry.content.substring(0, 150)}...
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function WeightLossResearch() {
   const [, setLocation] = useLocation();
@@ -66,7 +192,7 @@ export default function WeightLossResearch() {
 
         {/* Research Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 gap-2">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 gap-2">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -90,6 +216,10 @@ export default function WeightLossResearch() {
             <TabsTrigger value="metabolic" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Metabolic</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">History</span>
             </TabsTrigger>
           </TabsList>
 
@@ -181,6 +311,11 @@ export default function WeightLossResearch() {
                 </Streamdown>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history" className="space-y-6">
+            <ResearchHistory />
           </TabsContent>
         </Tabs>
 

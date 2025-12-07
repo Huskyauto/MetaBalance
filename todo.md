@@ -295,3 +295,16 @@
 - [x] Test complete workflow: generate research → auto-save to DB → retrieve history
 - [x] Write vitest tests for research storage (8 tests, all passing)
 - [x] Save checkpoint with automatic research database feature
+
+
+## Research History UI (User Request - Dec 3, 2025)
+
+- [x] Add "History" tab to Weight Loss Research page
+- [x] Create history view component showing past research generations
+- [x] Display timestamps for each research entry
+- [x] Add category filter dropdown (All, Overview, GLP-1, Fasting, etc.)
+- [x] Show research content in expandable cards
+- [x] Format timestamps in user-friendly format (e.g., "1 minute ago", "Dec 3, 2025")
+- [x] Test complete workflow: generate research → view history → filter by category
+- [x] Tested category filtering (GLP-1 Drugs filter working)
+- [x] Save checkpoint with research history UI
