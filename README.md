@@ -240,6 +240,16 @@ The app is designed to be deployed on platforms supporting Node.js applications:
 
 Ensure environment variables are properly configured in your deployment platform.
 
+### Automatic GitHub Sync
+
+The project is configured with automatic GitHub synchronization:
+- **Post-commit hook** - Automatically pushes all commits to GitHub
+- **Dual remotes** - Syncs to both Manus (`origin`) and GitHub (`github`) repositories
+- **Zero manual steps** - Every `webdev_save_checkpoint` or git commit automatically updates GitHub
+- **Repository URL** - https://github.com/Huskyauto/MetaBalance
+
+The git hook is located at `.git/hooks/post-commit` and runs after every commit.
+
 ### PWA Installation
 Once deployed, users can install MetaBalance as a Progressive Web App:
 1. Visit the app URL in a modern browser
