@@ -138,8 +138,21 @@ export default function WeightLossResearch() {
   const navigate = (path: string) => setLocation(path);
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Fetch research content from Grok API
-  const { data: researchData, isLoading } = trpc.research.getLatestResearch.useQuery();
+  // Load cached research from database first (instant)
+  const { data: cachedResearch, isLoading: loadingCache } = trpc.research.getHistory.useQuery(
+    { limit: 20 },
+    { staleTime: 1000 * 60 * 60 }
+  );
+  
+  // Convert cached research array to object by category (get most recent for each)
+  const researchData = cachedResearch?.reduce((acc: any, item: any) => {
+    if (!acc[item.category]) {
+      acc[item.category] = item.content;
+    }
+    return acc;
+  }, {} as Record<string, string>) || {};
+  
+  const isLoading = loadingCache;
 
   if (isLoading) {
     return (
@@ -157,7 +170,8 @@ export default function WeightLossResearch() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
-              <p className="text-gray-600">Loading latest research...</p>
+              <p className="text-gray-600 font-medium">Loading research from database...</p>
+              <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
             </div>
           </div>
         </div>
@@ -179,13 +193,20 @@ export default function WeightLossResearch() {
             Back to Dashboard
           </Button>
           
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
-              <BookOpen className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Weight Loss Research</h1>
-              <p className="text-gray-600 mt-1">Latest scientific findings and evidence-based strategies</p>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
+                <BookOpen className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">Weight Loss Research</h1>
+                <p className="text-gray-600 mt-1">Latest scientific findings and evidence-based strategies</p>
+                {cachedResearch && cachedResearch.length > 0 && (
+                  <p className="text-gray-500 text-sm mt-1">
+                    Last updated: {new Date(cachedResearch[0].generatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -195,31 +216,31 @@ export default function WeightLossResearch() {
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 gap-2">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              <span className="hidden sm:inline">Overview</span>
+              <span>Overview</span>
             </TabsTrigger>
             <TabsTrigger value="glp1" className="flex items-center gap-2">
               <Pill className="h-4 w-4" />
-              <span className="hidden sm:inline">GLP-1 Drugs</span>
+              <span>GLP-1</span>
             </TabsTrigger>
             <TabsTrigger value="fasting" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">Fasting</span>
+              <span>Fasting</span>
             </TabsTrigger>
             <TabsTrigger value="nutrition" className="flex items-center gap-2">
               <Utensils className="h-4 w-4" />
-              <span className="hidden sm:inline">Nutrition</span>
+              <span>Nutrition</span>
             </TabsTrigger>
             <TabsTrigger value="exercise" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
-              <span className="hidden sm:inline">Exercise</span>
+              <span>Exercise</span>
             </TabsTrigger>
             <TabsTrigger value="metabolic" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              <span className="hidden sm:inline">Metabolic</span>
+              <span>Metabolic</span>
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="h-4 w-4" />
-              <span className="hidden sm:inline">History</span>
+              <span>History</span>
             </TabsTrigger>
           </TabsList>
 

@@ -308,3 +308,20 @@
 - [x] Test complete workflow: generate research → view history → filter by category
 - [x] Tested category filtering (GLP-1 Drugs filter working)
 - [x] Save checkpoint with research history UI
+
+
+## Research Page UX Improvements (User Feedback - Dec 3, 2025)
+
+**Issues Reported:**
+- Tab icons are vague symbols without text labels (confusing on mobile)
+- Research loading takes too long (30-60 seconds)
+- No indication of loading progress
+
+**Solutions:**
+- [x] Add visible text labels to all research tab icons (show text on all screen sizes)
+- [x] Implement cached research loading - load from database instead of regenerating
+- [x] Display timestamp showing when research was last generated
+- [x] Improve loading message ("Loading research from database...")
+- [x] Test complete workflow: load research instantly → view tabs → see timestamp
+- [x] Verified instant loading (no 30-60 second wait)
+- [x] Save checkpoint with UX improvements
