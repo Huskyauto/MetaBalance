@@ -590,6 +590,85 @@ Be supportive, motivational, and practical in your responses.`;
         return await db.getResearchHistory(ctx.user.id, input.category, input.limit);
       }),
   }),
+
+  dailyGoals: router({
+    get: protectedProcedure
+      .input(z.object({ date: z.date() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getDailyGoal(ctx.user.id, input.date);
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        date: z.date(),
+        mealLoggingComplete: z.boolean().optional(),
+        proteinGoalComplete: z.boolean().optional(),
+        fastingGoalComplete: z.boolean().optional(),
+        exerciseGoalComplete: z.boolean().optional(),
+        waterGoalComplete: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { date, ...goals } = input;
+        return await db.upsertDailyGoal(ctx.user.id, date, goals);
+      }),
+    
+    getWeek: protectedProcedure
+      .input(z.object({ weekStartDate: z.date() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getWeeklyGoals(ctx.user.id, input.weekStartDate);
+      }),
+  }),
+
+  weeklyReflections: router({
+    create: protectedProcedure
+      .input(z.object({
+        weekStartDate: z.date(),
+        weekEndDate: z.date(),
+        wentWell: z.string(),
+        challenges: z.string(),
+        nextWeekPlan: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Calculate weekly stats
+        const weeklyGoals = await db.getWeeklyGoals(ctx.user.id, input.weekStartDate);
+        const daysLogged = weeklyGoals.filter(g => g.mealLoggingComplete).length;
+        const avgWinScore = weeklyGoals.length > 0 
+          ? Math.round(weeklyGoals.reduce((sum, g) => sum + (g.winScore || 0), 0) / weeklyGoals.length)
+          : 0;
+
+        // Generate AI insights using Grok
+        const profile = await db.getMetabolicProfile(ctx.user.id);
+        const aiInsights = await callGrok([
+          {
+            role: "system",
+            content: `You are a metabolic health coach analyzing a user's weekly reflection. Provide 2-3 specific, actionable insights based on their answers and weekly stats. User profile: ${profile?.currentWeight} lbs current, ${profile?.targetWeight} lbs target, ${profile?.activityLevel} activity level.`
+          },
+          {
+            role: "user",
+            content: `Weekly Reflection:\n\nWhat went well: ${input.wentWell}\n\nChallenges: ${input.challenges}\n\nNext week plan: ${input.nextWeekPlan}\n\nStats: Logged ${daysLogged}/7 days, Average daily win score: ${avgWinScore}/5 stars`
+          }
+        ]);
+
+        return await db.createWeeklyReflection(ctx.user.id, {
+          ...input,
+          daysLogged,
+          avgWinScore,
+          aiInsights,
+        });
+      }),
+    
+    get: protectedProcedure
+      .input(z.object({ weekStartDate: z.date() }))
+      .query(async ({ ctx, input }) => {
+        return await db.getWeeklyReflection(ctx.user.id, input.weekStartDate);
+      }),
+    
+    getRecent: protectedProcedure
+      .input(z.object({ limit: z.number().default(10) }))
+      .query(async ({ ctx, input }) => {
+        return await db.getRecentReflections(ctx.user.id, input.limit);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

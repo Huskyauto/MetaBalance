@@ -2,9 +2,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical } from "lucide-react";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DailyWins } from "@/components/DailyWins";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -64,6 +65,11 @@ export default function Dashboard() {
       </header>
 
       <div className="container py-8">
+        {/* Daily Wins Widget */}
+        <div className="mb-8">
+          <DailyWins />
+        </div>
+
         {/* Daily Insight */}
         {todayInsight ? (
           <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
@@ -235,6 +241,22 @@ export default function Dashboard() {
                   <div>
                     <CardTitle>Weight Loss Research</CardTitle>
                     <CardDescription>Latest scientific findings</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/reflection">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Weekly Reflection</CardTitle>
+                    <CardDescription>Review your progress & patterns</CardDescription>
                   </div>
                 </div>
               </CardHeader>

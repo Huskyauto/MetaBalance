@@ -11,7 +11,9 @@ import {
   progressLogs, InsertProgressLog,
   dailyInsights, InsertDailyInsight,
   chatMessages, InsertChatMessage,
-  researchContent, InsertResearchContent
+  researchContent, InsertResearchContent,
+  dailyGoals, InsertDailyGoal,
+  weeklyReflections, InsertWeeklyReflection
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -524,4 +526,161 @@ export async function toggleResearchBookmark(id: number, userId: number, bookmar
   await db.update(researchContent)
     .set({ bookmarked })
     .where(and(eq(researchContent.id, id), eq(researchContent.userId, userId)));
+}
+
+
+// ===== DAILY GOALS FUNCTIONS =====
+
+export async function upsertDailyGoal(userId: number, date: Date, goals: Partial<InsertDailyGoal>) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    // Calculate win score (0-5 based on completed goals)
+    const completedGoals = [
+      goals.mealLoggingComplete,
+      goals.proteinGoalComplete,
+      goals.fastingGoalComplete,
+      goals.exerciseGoalComplete,
+      goals.waterGoalComplete
+    ].filter(Boolean).length;
+
+    const winScore = completedGoals;
+
+    await db.insert(dailyGoals).values({
+      userId,
+      date,
+      ...goals,
+      winScore
+    }).onDuplicateKeyUpdate({
+      set: {
+        ...goals,
+        winScore,
+        updatedAt: new Date()
+      }
+    });
+
+    return { success: true, winScore };
+  } catch (error) {
+    console.error("[Database] Failed to upsert daily goal:", error);
+    return null;
+  }
+}
+
+export async function getDailyGoal(userId: number, date: Date) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const result = await db
+      .select()
+      .from(dailyGoals)
+      .where(
+        and(
+          eq(dailyGoals.userId, userId),
+          gte(dailyGoals.date, startOfDay),
+          lte(dailyGoals.date, endOfDay)
+        )
+      )
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get daily goal:", error);
+    return null;
+  }
+}
+
+export async function getWeeklyGoals(userId: number, weekStartDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const weekEndDate = new Date(weekStartDate);
+    weekEndDate.setDate(weekEndDate.getDate() + 7);
+
+    const result = await db
+      .select()
+      .from(dailyGoals)
+      .where(
+        and(
+          eq(dailyGoals.userId, userId),
+          gte(dailyGoals.date, weekStartDate),
+          lte(dailyGoals.date, weekEndDate)
+        )
+      )
+      .orderBy(dailyGoals.date);
+
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get weekly goals:", error);
+    return [];
+  }
+}
+
+// ===== WEEKLY REFLECTIONS FUNCTIONS =====
+
+export async function createWeeklyReflection(userId: number, reflection: Partial<InsertWeeklyReflection>) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.insert(weeklyReflections).values({
+      userId,
+      ...reflection
+    } as InsertWeeklyReflection);
+
+    return { success: true, id: result[0].insertId };
+  } catch (error) {
+    console.error("[Database] Failed to create weekly reflection:", error);
+    return null;
+  }
+}
+
+export async function getWeeklyReflection(userId: number, weekStartDate: Date) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db
+      .select()
+      .from(weeklyReflections)
+      .where(
+        and(
+          eq(weeklyReflections.userId, userId),
+          eq(weeklyReflections.weekStartDate, weekStartDate)
+        )
+      )
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get weekly reflection:", error);
+    return null;
+  }
+}
+
+export async function getRecentReflections(userId: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db
+      .select()
+      .from(weeklyReflections)
+      .where(eq(weeklyReflections.userId, userId))
+      .orderBy(desc(weeklyReflections.weekStartDate))
+      .limit(limit);
+
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get recent reflections:", error);
+    return [];
+  }
 }

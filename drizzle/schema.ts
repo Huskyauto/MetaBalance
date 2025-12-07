@@ -287,3 +287,58 @@ export const researchContent = mysqlTable("research_content", {
 
 export type ResearchContent = typeof researchContent.$inferSelect;
 export type InsertResearchContent = typeof researchContent.$inferInsert;
+
+/**
+ * Daily goals - tracks daily micro-goals and completion status
+ */
+export const dailyGoals = mysqlTable("daily_goals", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  date: timestamp("date").notNull(), // Date for this goal set
+  
+  // Goal completion flags
+  mealLoggingComplete: boolean("mealLoggingComplete").default(false), // Logged 3+ meals
+  proteinGoalComplete: boolean("proteinGoalComplete").default(false), // Hit protein target
+  fastingGoalComplete: boolean("fastingGoalComplete").default(false), // Completed fasting window
+  exerciseGoalComplete: boolean("exerciseGoalComplete").default(false), // Logged exercise
+  waterGoalComplete: boolean("waterGoalComplete").default(false), // Drank 8+ glasses
+  
+  // Calculated win score (0-5 stars)
+  winScore: int("winScore").default(0),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DailyGoal = typeof dailyGoals.$inferSelect;
+export type InsertDailyGoal = typeof dailyGoals.$inferInsert;
+
+/**
+ * Weekly reflections - stores user's weekly self-assessment and AI insights
+ */
+export const weeklyReflections = mysqlTable("weekly_reflections", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  weekStartDate: timestamp("weekStartDate").notNull(), // Monday of the week
+  weekEndDate: timestamp("weekEndDate").notNull(), // Sunday of the week
+  
+  // User's reflection answers
+  wentWell: text("wentWell"), // What went well this week?
+  challenges: text("challenges"), // What was challenging?
+  nextWeekPlan: text("nextWeekPlan"), // What will you do differently next week?
+  
+  // AI-generated insights
+  aiInsights: text("aiInsights"), // Pattern recognition from Grok
+  
+  // Weekly stats (calculated)
+  daysLogged: int("daysLogged").default(0), // Days with meal logging (0-7)
+  avgWinScore: int("avgWinScore").default(0), // Average daily win score
+  weightChange: int("weightChange"), // Weight change in pounds (can be negative)
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WeeklyReflection = typeof weeklyReflections.$inferSelect;
+export type InsertWeeklyReflection = typeof weeklyReflections.$inferInsert;
