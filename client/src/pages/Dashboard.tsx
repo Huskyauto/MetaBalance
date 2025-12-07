@@ -6,6 +6,8 @@ import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, Lo
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyWins } from "@/components/DailyWins";
+import { ProgressCharts } from "@/components/ProgressCharts";
+import { StreakTracker } from "@/components/StreakTracker";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -65,9 +67,15 @@ export default function Dashboard() {
       </header>
 
       <div className="container py-8">
-        {/* Daily Wins Widget */}
-        <div className="mb-8">
+        {/* Daily Wins and Streak Tracker */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <DailyWins />
+          <StreakTracker />
+        </div>
+
+        {/* Progress Charts */}
+        <div className="mb-8">
+          <ProgressCharts />
         </div>
 
         {/* Daily Insight */}

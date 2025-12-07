@@ -624,6 +624,39 @@ Be supportive, motivational, and practical in your responses.`;
       .query(async ({ ctx, input }) => {
         return await db.getWeeklyGoals(ctx.user.id, input.weekStartDate);
       }),
+    
+    toggleGoal: protectedProcedure
+      .input(z.object({
+        date: z.date(),
+        goalId: z.enum(['mealLogging', 'protein', 'fasting', 'exercise', 'water']),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Get current goal state
+        const currentGoal = await db.getDailyGoal(ctx.user.id, input.date);
+        
+        // Map goalId to database field and toggle
+        const updates: Record<string, boolean> = {};
+        
+        switch (input.goalId) {
+          case 'mealLogging':
+            updates.mealLoggingComplete = !(currentGoal?.mealLoggingComplete || false);
+            break;
+          case 'protein':
+            updates.proteinGoalComplete = !(currentGoal?.proteinGoalComplete || false);
+            break;
+          case 'fasting':
+            updates.fastingGoalComplete = !(currentGoal?.fastingGoalComplete || false);
+            break;
+          case 'exercise':
+            updates.exerciseGoalComplete = !(currentGoal?.exerciseGoalComplete || false);
+            break;
+          case 'water':
+            updates.waterGoalComplete = !(currentGoal?.waterGoalComplete || false);
+            break;
+        }
+        
+        return await db.upsertDailyGoal(ctx.user.id, input.date, updates);
+      }),
   }),
 
   weeklyReflections: router({

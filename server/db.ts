@@ -536,31 +536,50 @@ export async function upsertDailyGoal(userId: number, date: Date, goals: Partial
   if (!db) return null;
 
   try {
-    // Calculate win score (0-5 based on completed goals)
+    // Get current goal state to merge with new values
+    const currentGoal = await getDailyGoal(userId, date);
+    
+    // Merge current state with new values
+    const mergedGoals = {
+      mealLoggingComplete: goals.mealLoggingComplete ?? currentGoal?.mealLoggingComplete ?? false,
+      proteinGoalComplete: goals.proteinGoalComplete ?? currentGoal?.proteinGoalComplete ?? false,
+      fastingGoalComplete: goals.fastingGoalComplete ?? currentGoal?.fastingGoalComplete ?? false,
+      exerciseGoalComplete: goals.exerciseGoalComplete ?? currentGoal?.exerciseGoalComplete ?? false,
+      waterGoalComplete: goals.waterGoalComplete ?? currentGoal?.waterGoalComplete ?? false,
+    };
+
+    // Calculate win score (0-5 based on all completed goals)
     const completedGoals = [
-      goals.mealLoggingComplete,
-      goals.proteinGoalComplete,
-      goals.fastingGoalComplete,
-      goals.exerciseGoalComplete,
-      goals.waterGoalComplete
+      mergedGoals.mealLoggingComplete,
+      mergedGoals.proteinGoalComplete,
+      mergedGoals.fastingGoalComplete,
+      mergedGoals.exerciseGoalComplete,
+      mergedGoals.waterGoalComplete
     ].filter(Boolean).length;
 
     const winScore = completedGoals;
 
-    await db.insert(dailyGoals).values({
-      userId,
-      date,
-      ...goals,
-      winScore
-    }).onDuplicateKeyUpdate({
-      set: {
-        ...goals,
-        winScore,
-        updatedAt: new Date()
-      }
-    });
+    if (currentGoal) {
+      // Update existing record
+      await db.update(dailyGoals)
+        .set({
+          ...mergedGoals,
+          winScore,
+          updatedAt: new Date()
+        })
+        .where(eq(dailyGoals.id, currentGoal.id));
+    } else {
+      // Insert new record
+      await db.insert(dailyGoals).values({
+        userId,
+        date,
+        ...mergedGoals,
+        winScore
+      });
+    }
 
-    return { success: true, winScore };
+    // Return the full updated record
+    return await getDailyGoal(userId, date);
   } catch (error) {
     console.error("[Database] Failed to upsert daily goal:", error);
     return null;
@@ -603,7 +622,7 @@ export async function getWeeklyGoals(userId: number, weekStartDate: Date) {
 
   try {
     const weekEndDate = new Date(weekStartDate);
-    weekEndDate.setDate(weekEndDate.getDate() + 7);
+    weekEndDate.setDate(weekEndDate.getDate() + 6); // 7 days total (0-6)
 
     const result = await db
       .select()

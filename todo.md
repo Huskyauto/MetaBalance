@@ -462,3 +462,33 @@
 - [ ] Expand Vitest coverage for new get* functions
 - [ ] Add Playwright E2E tests for reflection workflow
 - [ ] Set up GitHub Actions CI/CD workflow
+
+
+## New Engagement Features (Dec 6, 2025)
+
+**Interactive Daily Wins:**
+- [x] Make checkboxes clickable to manually mark goals complete
+- [x] Add instant star rating updates when goals are checked
+- [x] Add celebration animation for 5-star days (confetti effect)
+- [x] Update backend to support manual goal completion (toggleGoal mutation)
+- [x] Write tests for manual goal tracking (3 new tests, all passing)
+- [x] Fix upsertDailyGoal to properly handle partial updates
+- [x] Install canvas-confetti library for celebrations
+
+**Progress Charts:**
+- [x] Install Recharts library for data visualization
+- [x] Create ProgressCharts component with LineChart
+- [x] Add 7/30/90-day view toggle buttons
+- [x] Calculate and display projected completion date (with weight loss rate)
+- [x] Add goal reference line on chart
+- [x] Integrate chart into Dashboard
+- [ ] Write tests for chart data calculations (deferred - complex UI component)
+
+**Streak Tracking:**
+- [x] Add streak calculation function (consecutive 3+ star days)
+- [x] Display streak counter on Dashboard with fire emoji and animation
+- [x] Add milestone celebrations (3, 7, 14, 30-day streaks with gradient badges)
+- [x] Calculate and display longest streak
+- [x] Show progress to next milestone
+- [ ] Store streak data in database for persistence (using calculated values for now)
+- [ ] Write tests for streak calculations (deferred - complex date logic)

@@ -42,8 +42,67 @@ describe("Daily Goals & Weekly Reflections", () => {
       expect(result?.winScore).toBe(5); // All goals = 5 stars
     });
 
-    it("should retrieve daily goal by date", async () => {
+    it("should toggle goal from false to true", async () => {
       const testDate = getTestDate(3);
+      // Create initial goal with all false
+      await db.upsertDailyGoal(testUserId, testDate, {
+        mealLoggingComplete: false,
+        proteinGoalComplete: false,
+        fastingGoalComplete: false,
+        exerciseGoalComplete: false,
+        waterGoalComplete: false,
+      });
+
+      // Toggle mealLogging to true
+      const result = await db.upsertDailyGoal(testUserId, testDate, {
+        mealLoggingComplete: true,
+      });
+
+      expect(result).toBeTruthy();
+      expect(result?.mealLoggingComplete).toBe(true);
+      expect(result?.winScore).toBe(1); // 1 goal completed = 1 star
+    });
+
+    it("should toggle goal from true to false", async () => {
+      const testDate = getTestDate(4);
+      // Create initial goal with some true
+      await db.upsertDailyGoal(testUserId, testDate, {
+        mealLoggingComplete: true,
+        proteinGoalComplete: true,
+        fastingGoalComplete: false,
+      });
+
+      // Toggle mealLogging to false
+      const result = await db.upsertDailyGoal(testUserId, testDate, {
+        mealLoggingComplete: false,
+      });
+
+      expect(result).toBeTruthy();
+      expect(result?.mealLoggingComplete).toBe(false);
+      expect(result?.proteinGoalComplete).toBe(true); // Other goals unchanged
+      expect(result?.winScore).toBe(1); // Only protein goal remains = 1 star
+    });
+
+    it("should update win score when toggling multiple goals", async () => {
+      const testDate = getTestDate(5);
+      // Start with 2 goals
+      await db.upsertDailyGoal(testUserId, testDate, {
+        mealLoggingComplete: true,
+        proteinGoalComplete: true,
+      });
+
+      // Add 2 more goals
+      const result = await db.upsertDailyGoal(testUserId, testDate, {
+        fastingGoalComplete: true,
+        exerciseGoalComplete: true,
+      });
+
+      expect(result).toBeTruthy();
+      expect(result?.winScore).toBe(4); // 4 goals completed = 4 stars
+    });
+
+    it("should retrieve daily goal by date", async () => {
+      const testDate = getTestDate(6);
       await db.upsertDailyGoal(testUserId, testDate, {
         mealLoggingComplete: true,
         proteinGoalComplete: false,
@@ -56,7 +115,7 @@ describe("Daily Goals & Weekly Reflections", () => {
     });
 
     it("should update existing daily goal", async () => {
-      const testDate = getTestDate(4);
+      const testDate = getTestDate(7);
       // First create
       const result1 = await db.upsertDailyGoal(testUserId, testDate, {
         mealLoggingComplete: true,
