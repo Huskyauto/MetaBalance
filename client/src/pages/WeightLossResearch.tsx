@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, BookOpen, TrendingUp, Pill, Clock, Utensils, Activity, History } from "lucide-react";
+import { ArrowLeft, Loader2, BookOpen, TrendingUp, Pill, Clock, Utensils, Activity, History, RefreshCw } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,34 +137,36 @@ export default function WeightLossResearch() {
   const [, setLocation] = useLocation();
   const navigate = (path: string) => setLocation(path);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const utils = trpc.useUtils();
   
-  // Load cached research from database first (instant)
-  const { data: cachedResearch, isLoading: loadingCache } = trpc.research.getHistory.useQuery(
-    { limit: 20 },
-    { staleTime: 1000 * 60 * 60 }
-  );
-  
-  // If no cached research, generate fresh research
-  const { data: freshResearch, isLoading: loadingFresh } = trpc.research.getLatestResearch.useQuery(
+  // Always generate fresh research on page load
+  const { data: freshResearch, isLoading: loadingFresh, refetch: refetchResearch } = trpc.research.getLatestResearch.useQuery(
     undefined,
     { 
-      enabled: !loadingCache && (!cachedResearch || cachedResearch.length === 0),
-      staleTime: 1000 * 60 * 60 * 24 // Cache for 24 hours
+      staleTime: 0, // Never use stale data
+      refetchOnMount: true // Always refetch when component mounts
     }
   );
   
-  // Convert cached research array to object by category (get most recent for each)
-  const cachedData = cachedResearch?.reduce((acc: any, item: any) => {
-    if (!acc[item.category]) {
-      acc[item.category] = item.content;
+  // Load research history separately (for History tab only)
+  const { data: researchHistory } = trpc.research.getHistory.useQuery(
+    { limit: 10 },
+    { staleTime: 1000 * 60 * 5 } // Cache history for 5 minutes
+  );
+  
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetchResearch();
+      await utils.research.getHistory.invalidate();
+    } finally {
+      setIsRefreshing(false);
     }
-    return acc;
-  }, {} as Record<string, string>) || {};
+  };
   
-  // Use cached data if available, otherwise use fresh research
-  const researchData = Object.keys(cachedData).length > 0 ? cachedData : freshResearch || {};
-  
-  const isLoading = loadingCache || loadingFresh;
+  const researchData: Record<string, string> = freshResearch || {};
+  const isLoading = loadingFresh;
 
   if (isLoading) {
     return (
@@ -210,20 +212,26 @@ export default function WeightLossResearch() {
           </Button>
           
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
               <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
                 <BookOpen className="h-8 w-8 text-white" />
               </div>
               <div>
                 <h1 className="text-4xl font-bold text-gray-900">Weight Loss Research</h1>
                 <p className="text-gray-600 mt-1">Latest scientific findings and evidence-based strategies</p>
-                {cachedResearch && cachedResearch.length > 0 && (
-                  <p className="text-gray-500 text-sm mt-1">
-                    Last updated: {new Date(cachedResearch[0].generatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                  </p>
-                )}
+                <p className="text-gray-500 text-sm mt-1">
+                  Fresh research generated on every visit
+                </p>
               </div>
             </div>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh Research'}
+            </Button>
           </div>
         </div>
 

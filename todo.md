@@ -612,3 +612,13 @@
 - [x] Add Profile navigation link back to Dashboard (added Health Profile card to feature grid)
 - [x] Ensure both Profile (health settings) and Settings (notifications) are accessible
 - [x] Test navigation flow (all 45 tests passing)
+
+
+## Research Refresh Issue (Dec 7, 2025)
+
+**Research Not Updating:**
+- [x] Investigate why research page shows old content (was using cache)
+- [x] Add manual "Refresh Research" button for users
+- [x] Change behavior: Always generate fresh research on page load (staleTime: 0, refetchOnMount: true)
+- [x] History tab shows past 10 research generations separately
+- [x] Test auto-refresh behavior (all 45 tests passing)
