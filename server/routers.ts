@@ -360,6 +360,12 @@ export const appRouter = router({
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const recentMeals = await db.getWeeklyNutritionData(ctx.user.id, sevenDaysAgo, new Date());
       
+      // Get weekly win scores for habit tracking context
+      const weeklyGoals = await db.getWeeklyGoals(ctx.user.id, sevenDaysAgo);
+      const avgWinScore = weeklyGoals.length > 0
+        ? weeklyGoals.reduce((sum, g) => sum + (g.winScore || 0), 0) / weeklyGoals.length
+        : 0;
+      
       // Build context for Grok
       const firstWeight = recentProgress[0]?.weight;
       const lastWeight = recentProgress[recentProgress.length - 1]?.weight;
@@ -382,6 +388,7 @@ User Profile:
 Recent Activity:
 - Progress logs in past week: ${recentProgress.length}
 - Meals logged recently: ${recentMeals.length}
+- Average win score (7 days): ${avgWinScore.toFixed(1)}/5.0 stars${avgWinScore >= 4 ? ' - Excellent momentum!' : avgWinScore >= 3 ? ' - Good consistency!' : avgWinScore >= 2 ? ' - Building habits!' : avgWinScore > 0 ? ' - Keep going!' : ''}
       `.trim();
 
       const prompt = `You are a supportive metabolic health coach helping someone on their weight loss and metabolic health journey. Based on their profile and recent activity, generate a brief, personalized daily insight (2-3 sentences max) that:

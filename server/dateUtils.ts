@@ -77,3 +77,45 @@ export function isSameDay(date1: Date, date2: Date): boolean {
     date1.getDate() === date2.getDate()
   );
 }
+
+
+/**
+ * Build date range conditions for Drizzle queries
+ * Reduces duplication of gte/lte logic across db.ts functions
+ */
+export function buildDateRange(startDate?: Date, endDate?: Date) {
+  const conditions: any[] = [];
+  
+  if (startDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    conditions.push({ gte: start });
+  }
+  
+  if (endDate) {
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    conditions.push({ lte: end });
+  }
+  
+  return conditions.length > 0 ? conditions : undefined;
+}
+
+/**
+ * Normalize date to start of day (UTC)
+ * Prevents timezone bugs in date comparisons
+ */
+export function normalizeToStartOfDay(date: Date | string): Date {
+  const d = typeof date === 'string' ? new Date(date) : new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * Normalize date to end of day (UTC)
+ */
+export function normalizeToEndOfDay(date: Date | string): Date {
+  const d = typeof date === 'string' ? new Date(date) : new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
