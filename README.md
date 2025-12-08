@@ -2,15 +2,42 @@
 
 **Personalized Metabolic Health App for Obesity Reversal and Weight Loss**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-45%2F45%20passing-brightgreen)](https://github.com/Huskyauto/MetaBalance)
+[![Production Ready](https://img.shields.io/badge/status-production%20ready-success)](https://metabalance.manus.space)
+
 MetaBalance is a comprehensive web application designed to help individuals achieve sustainable weight loss and metabolic health through evidence-based strategies, AI coaching, and personalized tracking.
+
+**🚀 [Try Live Demo](https://metabalance.manus.space)** | **📖 [Setup Guide](SETUP.md)** | **📝 [License](LICENSE)**
 
 ## ✅ App Status: Production Ready (Grade A+)
 
-**Latest Review:** December 6, 2025  
+**Live Demo:** https://metabalance.manus.space  
+**Latest Review:** December 7, 2025  
 **Test Coverage:** 45/45 tests passing ✅  
 **Critical Bugs:** Zero  
-**Performance:** Excellent (instant loading with database caching)  
-**Latest Update:** Added three engagement features (Interactive Daily Wins, Progress Charts, Streak Tracking)
+**Performance:** Excellent (instant loading with database caching, foreign key constraints, performance indexes)  
+**Latest Update:** Production-ready improvements (database foreign keys, research auto-refresh, notification preferences UI)
+
+## 📸 Screenshots
+
+### Dashboard with Interactive Daily Wins & Streak Tracker
+![Dashboard](https://github.com/Huskyauto/MetaBalance/assets/dashboard-preview.png)
+*Track daily goals with clickable checkboxes, instant star updates, and confetti celebrations for 5-star days. Build streaks with consecutive 3+ star days.*
+
+### Weight Progress Charts
+![Progress Charts](https://github.com/Huskyauto/MetaBalance/assets/progress-charts.png)
+*Visualize weight trends with 7/30/90-day views and see projected goal completion dates.*
+
+### AI Health Coach
+![AI Coach](https://github.com/Huskyauto/MetaBalance/assets/ai-coach.png)
+*Get personalized, context-aware health coaching powered by Grok AI with full chat history.*
+
+### Weight Loss Research Hub
+![Research Hub](https://github.com/Huskyauto/MetaBalance/assets/research-hub.png)
+*Access latest scientific findings on GLP-1 medications, fasting, nutrition, and metabolic health.*
+
+> **Note:** Screenshots are illustrative. Visit the [live demo](https://metabalance.manus.space) to experience the full interactive app.
 
 ## 🎯 Features
 
@@ -71,57 +98,40 @@ MetaBalance is a comprehensive web application designed to help individuals achi
 - **Grok AI (xAI)** - AI coaching and research generation
 - **Manus OAuth** - Authentication system
 
-## 📦 Installation
+## 🚀 Getting Started
 
-### Prerequisites
-- Node.js 22+
-- pnpm package manager
-- MySQL or TiDB database
+### Quick Start (Recommended)
 
-### Setup
+The easiest way to try MetaBalance is to use the **[live demo](https://metabalance.manus.space)**.
 
-1. Clone the repository:
+### Self-Hosting
+
+For local development or self-hosting, see the **[SETUP.md](SETUP.md)** guide for detailed instructions including:
+- Environment variable configuration
+- API key setup (Spoonacular, Grok AI)
+- Database initialization
+- Deployment options (Manus, Vercel, Railway)
+
+**Quick setup:**
+
 ```bash
+# Clone and install
 git clone https://github.com/Huskyauto/MetaBalance.git
 cd MetaBalance
-```
-
-2. Install dependencies:
-```bash
 pnpm install
-```
 
-3. Set up environment variables:
-Create a `.env` file with the following variables:
-```env
-# Database
-DATABASE_URL=mysql://user:password@host:port/database
+# Configure environment (see SETUP.md for details)
+cp .env.example .env
+# Edit .env with your API keys
 
-# Authentication
-JWT_SECRET=your-jwt-secret
-OAUTH_SERVER_URL=your-oauth-server-url
-VITE_OAUTH_PORTAL_URL=your-oauth-portal-url
-
-# APIs
-SPOONACULAR_API_KEY=your-spoonacular-api-key
-XAI_API_KEY=your-grok-api-key
-
-# App Configuration
-VITE_APP_TITLE=MetaBalance
-VITE_APP_ID=your-app-id
-```
-
-4. Push database schema:
-```bash
+# Initialize database
 pnpm db:push
-```
 
-5. Start development server:
-```bash
+# Start development server
 pnpm dev
 ```
 
-The app will be available at `http://localhost:3000`
+The app will be available at `http://localhost:3000`. See [SETUP.md](SETUP.md) for troubleshooting and deployment options.
 
 ## 🧪 Testing
 
@@ -131,7 +141,7 @@ pnpm test
 ```
 
 Current test coverage:
-- **42 tests across 10 test files** - All passing ✅
+- **45 tests across 10 test files** - All passing ✅
 - Profile management and automatic initialization
 - Profile data persistence (test isolation with separate user IDs)
 - Meal logging and nutrition tracking

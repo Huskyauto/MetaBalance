@@ -622,3 +622,21 @@
 - [x] Change behavior: Always generate fresh research on page load (staleTime: 0, refetchOnMount: true)
 - [x] History tab shows past 10 research generations separately
 - [x] Test auto-refresh behavior (all 45 tests passing)
+
+
+## Gemini's Production-Ready Recommendations (Dec 7, 2025)
+
+**Open Source Standards:**
+- [x] Add MIT LICENSE file
+- [x] Create SETUP.md with all required API keys and environment variables
+- [ ] Add CONTRIBUTING.md guide (deferred - not critical for current stage)
+
+**Documentation:**
+- [x] Update README with live deployment link (https://metabalance.manus.space)
+- [x] Add screenshots section to README (4 feature screenshots)
+- [x] Improve "Getting Started" section (added Quick Start and reference to SETUP.md)
+- [x] Add badges (License, Tests, Production Ready)
+
+**Deployment:**
+- [x] Production database documented in SETUP.md
+- [x] API dependencies and error handling documented in SETUP.md
