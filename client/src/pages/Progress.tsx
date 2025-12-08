@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { TrendingDown, Plus, ArrowLeft, Trash2 } from "lucide-react";
+import { TrendingDown, Plus, ArrowLeft, Trash2, Download } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Progress() {
@@ -93,14 +93,36 @@ export default function Progress() {
             </h1>
             <p className="text-muted-foreground">Track your weight and measurements over time</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Log Progress
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={async () => {
+              try {
+                toast.loading("Generating PDF...");
+                const result = await utils.client.progress.exportPDF.query();
+                const blob = new Blob([Uint8Array.from(atob(result.pdf), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.dismiss();
+                toast.success("Progress report downloaded!");
+              } catch (error) {
+                toast.dismiss();
+                toast.error("Failed to generate PDF");
+              }
+            }}>
+              <Download className="h-4 w-4 mr-2" />
+              Download Report
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Log Progress
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
               <DialogHeader>
                 <DialogTitle>Log Your Progress</DialogTitle>
                 <DialogDescription>Record your current weight and measurements</DialogDescription>
@@ -171,7 +193,8 @@ export default function Progress() {
                 </div>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {/* Summary Cards */}

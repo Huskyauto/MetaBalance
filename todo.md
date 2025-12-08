@@ -640,3 +640,31 @@
 **Deployment:**
 - [x] Production database documented in SETUP.md
 - [x] API dependencies and error handling documented in SETUP.md
+
+
+## Screenshots & Documentation (User Request - Dec 7, 2025)
+
+- [x] Capture screenshot of Dashboard with Today's Wins and Streak Tracker
+- [x] Capture screenshot of Dietary Tracking page with meal entries
+- [x] Capture screenshot of Progress Charts showing weight trends
+- [ ] Capture screenshot of Weight Loss Research page
+- [ ] Capture screenshot of Nutrition Analytics with weekly charts
+- [x] Update README.md with real screenshot images (replace placeholders)
+- [x] Optimize screenshot file sizes for fast GitHub loading
+
+## PDF Progress Report Export (User Request - Dec 7, 2025)
+
+- [x] Create backend PDF generation service using pdfkit
+- [x] Design PDF layout with MetaBalance branding (logo, colors)
+- [x] Include weight progress data and recent entries
+- [x] Include nutrition stats summary (average calories, macros)
+- [x] Include streak tracking and daily wins achievements
+- [x] Include current vs target weight with progress
+- [x] Add weight log history table
+- [x] Add "Generated on [date]" footer with disclaimer
+- [x] Create tRPC procedure: progress.exportPDF
+- [x] Add "Download Progress Report" button to Progress Tracking page
+- [ ] Add "Download Report" button to Dashboard (optional)
+- [x] Test PDF generation with real user data
+- [x] Verify PDF downloads correctly in browser
+- [x] Write vitest tests for PDF generation procedure

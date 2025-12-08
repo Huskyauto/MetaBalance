@@ -22,22 +22,18 @@ MetaBalance is a comprehensive web application designed to help individuals achi
 ## 📸 Screenshots
 
 ### Dashboard with Interactive Daily Wins & Streak Tracker
-![Dashboard](https://github.com/Huskyauto/MetaBalance/assets/dashboard-preview.png)
+![Dashboard](/screenshot-dashboard.png)
 *Track daily goals with clickable checkboxes, instant star updates, and confetti celebrations for 5-star days. Build streaks with consecutive 3+ star days.*
 
-### Weight Progress Charts
-![Progress Charts](https://github.com/Huskyauto/MetaBalance/assets/progress-charts.png)
-*Visualize weight trends with 7/30/90-day views and see projected goal completion dates.*
+### Dietary Tracking with Nutrition Analytics
+![Dietary Tracking](/screenshot-dietary.png)
+*Log meals with detailed nutrition information, automatic food search via Spoonacular API, and real-time daily totals with progress bars.*
 
-### AI Health Coach
-![AI Coach](https://github.com/Huskyauto/MetaBalance/assets/ai-coach.png)
-*Get personalized, context-aware health coaching powered by Grok AI with full chat history.*
+### Progress Tracking
+![Progress Tracking](/screenshot-progress.png)
+*Track weight and body measurements over time with visual charts and goal progress indicators.*
 
-### Weight Loss Research Hub
-![Research Hub](https://github.com/Huskyauto/MetaBalance/assets/research-hub.png)
-*Access latest scientific findings on GLP-1 medications, fasting, nutrition, and metabolic health.*
-
-> **Note:** Screenshots are illustrative. Visit the [live demo](https://metabalance.manus.space) to experience the full interactive app.
+> **Note:** Screenshots show the actual production app. Visit the [live demo](https://metabalance.manus.space) to experience the full interactive features.
 
 ## 🎯 Features
 

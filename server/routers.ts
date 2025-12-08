@@ -347,6 +347,81 @@ export const appRouter = router({
         });
         return { success: true };
       }),
+    
+    exportPDF: protectedProcedure.query(async ({ ctx }) => {
+      const { generateProgressPDF } = await import("./pdfGenerator");
+      
+      // Gather all data needed for PDF
+      const profile = await db.getMetabolicProfile(ctx.user.id);
+      const progressLogs = await db.getProgressLogs(ctx.user.id);
+      // Calculate streak manually from daily goals
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const dailyGoals = await db.getWeeklyGoals(ctx.user.id, thirtyDaysAgo);
+      
+      // Calculate current and longest streak
+      let currentStreak = 0;
+      let longestStreak = 0;
+      let tempStreak = 0;
+      const sortedGoals = [...dailyGoals].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      for (const goal of sortedGoals) {
+        if ((goal.winScore || 0) >= 3) {
+          tempStreak++;
+          if (tempStreak > longestStreak) longestStreak = tempStreak;
+        } else {
+          if (currentStreak === 0) currentStreak = tempStreak;
+          tempStreak = 0;
+        }
+      }
+      if (currentStreak === 0) currentStreak = tempStreak;
+      
+      // Calculate nutrition stats (7-day average)
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const allMeals: any[] = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+        const dayMeals = await db.getMealsByDate(ctx.user.id, date);
+        allMeals.push(...dayMeals);
+      }
+      
+      const nutritionStats = {
+        avgCalories: allMeals.reduce((sum: number, m: any) => sum + (m.calories || 0), 0) / Math.max(allMeals.length, 1),
+        avgProtein: allMeals.reduce((sum: number, m: any) => sum + (m.protein || 0), 0) / Math.max(allMeals.length, 1),
+        avgCarbs: allMeals.reduce((sum: number, m: any) => sum + (m.carbs || 0), 0) / Math.max(allMeals.length, 1),
+        avgFats: allMeals.reduce((sum: number, m: any) => sum + (m.fats || 0), 0) / Math.max(allMeals.length, 1),
+      };
+      
+      // Calculate daily wins stats
+      const totalDays = dailyGoals.length;
+      const avgStars = dailyGoals.reduce((sum: number, g: any) => sum + (g.winScore || 0), 0) / Math.max(totalDays, 1);
+      const perfectDays = dailyGoals.filter((g: any) => (g.winScore || 0) >= 5).length;
+      
+      const pdfBuffer = await generateProgressPDF({
+        currentWeight: profile?.currentWeight || 0,
+        targetWeight: profile?.targetWeight || 0,
+        weightLogs: progressLogs.map(log => ({
+          weight: log.weight || 0,
+          loggedAt: log.loggedAt,
+        })),
+        nutritionStats,
+        streakData: {
+          currentStreak,
+          longestStreak,
+        },
+        dailyWins: {
+          totalDays,
+          avgStars,
+          perfectDays,
+        },
+        userName: ctx.user.name || "User",
+      });
+      
+      // Return base64 encoded PDF
+      return {
+        pdf: pdfBuffer.toString("base64"),
+        filename: `metabalance-progress-${new Date().toISOString().split('T')[0]}.pdf`,
+      };
+    }),
   }),
 
   insights: router({
