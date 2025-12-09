@@ -1,26 +1,21 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
-  insertUserSchema, insertWeightLogSchema, insertMealSchema, 
+  insertWeightLogSchema, insertMealSchema, 
   insertFastingSessionSchema, insertChatMessageSchema 
 } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 
-// Initialize OpenAI only if API key is available
 const openai = process.env.OPENAI_API_KEY 
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
-// Spoonacular API configuration
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 const SPOONACULAR_BASE_URL = "https://api.spoonacular.com";
 
-// Demo user ID for development (in production, this would come from auth)
-const DEMO_USER_ID = "demo-user";
-
-// Fallback responses when OpenAI is not available
 function getFallbackResponse(userMessage: string): string {
   const message = userMessage.toLowerCase();
   
@@ -51,48 +46,28 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
-  // Initialize demo user if not exists
-  app.use(async (req, res, next) => {
-    const existingUser = await storage.getUser(DEMO_USER_ID);
-    if (!existingUser) {
-      try {
-        await storage.createUser({
-          username: "demo",
-          password: "demo123",
-          name: "Alex",
-          targetWeight: 165,
-          startWeight: 200,
-          dailyCalorieTarget: 2000,
-          dailyProteinTarget: 120,
-          dailyCarbsTarget: 200,
-          dailyFatTarget: 65,
-          preferredFastingProtocol: "16:8",
-        });
-      } catch (e) {
-        // User might already exist
-      }
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
-    next();
   });
 
   // ============ User Routes ============
   
-  app.get("/api/user", async (req, res) => {
+  app.get("/api/user", isAuthenticated, async (req: any, res) => {
     try {
-      let user = await storage.getUserByUsername("demo");
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       if (!user) {
-        user = await storage.createUser({
-          username: "demo",
-          password: "demo123",
-          name: "Alex",
-          targetWeight: 165,
-          startWeight: 200,
-          dailyCalorieTarget: 2000,
-          dailyProteinTarget: 120,
-          dailyCarbsTarget: 200,
-          dailyFatTarget: 65,
-          preferredFastingProtocol: "16:8",
-        });
+        return res.status(404).json({ error: "User not found" });
       }
       res.json(user);
     } catch (error) {
@@ -100,13 +75,10 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/user", async (req, res) => {
+  app.patch("/api/user", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      const updated = await storage.updateUser(user.id, req.body);
+      const userId = req.user.claims.sub;
+      const updated = await storage.updateUser(userId, req.body);
       res.json(updated);
     } catch (error) {
       res.status(500).json({ error: "Failed to update user" });
@@ -115,37 +87,31 @@ export async function registerRoutes(
 
   // ============ Weight Logs Routes ============
   
-  app.get("/api/weight-logs", async (req, res) => {
+  app.get("/api/weight-logs", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
+      const userId = req.user.claims.sub;
       const limit = parseInt(req.query.limit as string) || 30;
-      const logs = await storage.getWeightLogs(user.id, limit);
+      const logs = await storage.getWeightLogs(userId, limit);
       res.json(logs);
     } catch (error) {
       res.status(500).json({ error: "Failed to get weight logs" });
     }
   });
 
-  app.get("/api/weight-logs/latest", async (req, res) => {
+  app.get("/api/weight-logs/latest", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
-      const log = await storage.getLatestWeight(user.id);
+      const userId = req.user.claims.sub;
+      const log = await storage.getLatestWeight(userId);
       res.json(log || null);
     } catch (error) {
       res.status(500).json({ error: "Failed to get latest weight" });
     }
   });
 
-  app.post("/api/weight-logs", async (req, res) => {
+  app.post("/api/weight-logs", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
-      const data = insertWeightLogSchema.parse({ ...req.body, userId: user.id });
+      const userId = req.user.claims.sub;
+      const data = insertWeightLogSchema.parse({ ...req.body, userId });
       const log = await storage.createWeightLog(data);
       res.json(log);
     } catch (error) {
@@ -158,31 +124,29 @@ export async function registerRoutes(
 
   // ============ Meals Routes ============
   
-  app.get("/api/meals", async (req, res) => {
+  app.get("/api/meals", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
+      const userId = req.user.claims.sub;
       const date = req.query.date as string;
       if (date) {
-        const meals = await storage.getMealsByDate(user.id, date);
+        const meals = await storage.getMealsByDate(userId, date);
         return res.json(meals);
       }
-      
       const limit = parseInt(req.query.limit as string) || 50;
-      const meals = await storage.getMeals(user.id, limit);
+      const meals = await storage.getMeals(userId, limit);
       res.json(meals);
     } catch (error) {
       res.status(500).json({ error: "Failed to get meals" });
     }
   });
 
-  app.get("/api/nutrition/:date", async (req, res) => {
+  app.get("/api/nutrition/:date", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       if (!user) return res.status(404).json({ error: "User not found" });
       
-      const nutrition = await storage.getDailyNutrition(user.id, req.params.date);
+      const nutrition = await storage.getDailyNutrition(userId, req.params.date);
       res.json({
         ...nutrition,
         targets: {
@@ -197,12 +161,10 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/meals", async (req, res) => {
+  app.post("/api/meals", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
-      const data = insertMealSchema.parse({ ...req.body, userId: user.id });
+      const userId = req.user.claims.sub;
+      const data = insertMealSchema.parse({ ...req.body, userId });
       const meal = await storage.createMeal(data);
       res.json(meal);
     } catch (error) {
@@ -213,7 +175,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/meals/:id", async (req, res) => {
+  app.delete("/api/meals/:id", isAuthenticated, async (req: any, res) => {
     try {
       await storage.deleteMeal(req.params.id);
       res.json({ success: true });
@@ -224,44 +186,40 @@ export async function registerRoutes(
 
   // ============ Fasting Routes ============
   
-  app.get("/api/fasting/active", async (req, res) => {
+  app.get("/api/fasting/active", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
-      const session = await storage.getActiveFastingSession(user.id);
+      const userId = req.user.claims.sub;
+      const session = await storage.getActiveFastingSession(userId);
       res.json(session || null);
     } catch (error) {
       res.status(500).json({ error: "Failed to get active session" });
     }
   });
 
-  app.get("/api/fasting/history", async (req, res) => {
+  app.get("/api/fasting/history", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
+      const userId = req.user.claims.sub;
       const limit = parseInt(req.query.limit as string) || 10;
-      const sessions = await storage.getFastingSessions(user.id, limit);
+      const sessions = await storage.getFastingSessions(userId, limit);
       res.json(sessions);
     } catch (error) {
       res.status(500).json({ error: "Failed to get fasting history" });
     }
   });
 
-  app.post("/api/fasting/start", async (req, res) => {
+  app.post("/api/fasting/start", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       if (!user) return res.status(404).json({ error: "User not found" });
       
-      // Check if there's already an active session
-      const active = await storage.getActiveFastingSession(user.id);
+      const active = await storage.getActiveFastingSession(userId);
       if (active) {
         return res.status(400).json({ error: "Already have an active fasting session" });
       }
       
       const data = insertFastingSessionSchema.parse({
-        userId: user.id,
+        userId,
         protocol: req.body.protocol || user.preferredFastingProtocol,
         startTime: new Date(),
         targetDurationHours: req.body.targetDurationHours || 16,
@@ -277,7 +235,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/fasting/:id/end", async (req, res) => {
+  app.post("/api/fasting/:id/end", isAuthenticated, async (req: any, res) => {
     try {
       const session = await storage.endFastingSession(req.params.id);
       if (!session) {
@@ -291,14 +249,11 @@ export async function registerRoutes(
 
   // ============ Daily Goals Routes ============
   
-  app.get("/api/goals/:date", async (req, res) => {
+  app.get("/api/goals/:date", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
+      const userId = req.user.claims.sub;
+      const goals = await storage.getDailyGoals(userId, req.params.date);
       
-      const goals = await storage.getDailyGoals(user.id, req.params.date);
-      
-      // Return default goals if none exist for this date
       if (!goals) {
         return res.json({
           date: req.params.date,
@@ -318,13 +273,11 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/goals/:date", async (req, res) => {
+  app.put("/api/goals/:date", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
+      const userId = req.user.claims.sub;
       const goal = await storage.upsertDailyGoals({
-        userId: user.id,
+        userId,
         date: req.params.date,
         goals: req.body.goals,
       });
@@ -336,14 +289,12 @@ export async function registerRoutes(
 
   // ============ Streak Routes ============
   
-  app.get("/api/streak", async (req, res) => {
+  app.get("/api/streak", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
-      let streak = await storage.getStreak(user.id);
+      const userId = req.user.claims.sub;
+      let streak = await storage.getStreak(userId);
       if (!streak) {
-        streak = await storage.updateStreak(user.id, {
+        streak = await storage.updateStreak(userId, {
           currentStreak: 0,
           longestStreak: 0,
         });
@@ -354,13 +305,11 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/streak/update", async (req, res) => {
+  app.post("/api/streak/update", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
+      const userId = req.user.claims.sub;
       const today = new Date().toISOString().split('T')[0];
-      const existingStreak = await storage.getStreak(user.id);
+      const existingStreak = await storage.getStreak(userId);
       
       let newCurrentStreak = 1;
       let newLongestStreak = existingStreak?.longestStreak || 0;
@@ -371,20 +320,17 @@ export async function registerRoutes(
         const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
         
         if (diffDays === 0) {
-          // Already logged today
           return res.json(existingStreak);
         } else if (diffDays === 1) {
-          // Consecutive day
           newCurrentStreak = (existingStreak.currentStreak || 0) + 1;
         }
-        // else: streak broken, starts at 1
       }
       
       if (newCurrentStreak > newLongestStreak) {
         newLongestStreak = newCurrentStreak;
       }
       
-      const streak = await storage.updateStreak(user.id, {
+      const streak = await storage.updateStreak(userId, {
         currentStreak: newCurrentStreak,
         longestStreak: newLongestStreak,
         lastActiveDate: today,
@@ -398,22 +344,21 @@ export async function registerRoutes(
 
   // ============ Chat Routes (AI Coach) ============
   
-  app.get("/api/chat", async (req, res) => {
+  app.get("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
+      const userId = req.user.claims.sub;
       const limit = parseInt(req.query.limit as string) || 50;
-      const messages = await storage.getChatMessages(user.id, limit);
+      const messages = await storage.getChatMessages(userId, limit);
       res.json(messages);
     } catch (error) {
       res.status(500).json({ error: "Failed to get chat messages" });
     }
   });
 
-  app.post("/api/chat", async (req, res) => {
+  app.post("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       if (!user) return res.status(404).json({ error: "User not found" });
       
       const userMessage = req.body.message;
@@ -421,29 +366,27 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Message is required" });
       }
       
-      // Save user message
       await storage.createChatMessage({
-        userId: user.id,
+        userId,
         role: "user",
         content: userMessage,
       });
       
-      // Get user context for AI
-      const latestWeight = await storage.getLatestWeight(user.id);
-      const streak = await storage.getStreak(user.id);
+      const latestWeight = await storage.getLatestWeight(userId);
+      const streak = await storage.getStreak(userId);
       const today = new Date().toISOString().split('T')[0];
-      const nutrition = await storage.getDailyNutrition(user.id, today);
+      const nutrition = await storage.getDailyNutrition(userId, today);
+      const chatHistory = await storage.getChatMessages(userId, 10);
       
-      // Get chat history for context
-      const chatHistory = await storage.getChatMessages(user.id, 10);
+      const displayName = user.firstName || user.email?.split('@')[0] || 'there';
       
       const systemPrompt = `You are a supportive and knowledgeable health coach named Coach in the MetaBalance app. 
       
 User Profile:
-- Name: ${user.name}
+- Name: ${displayName}
 - Current Weight: ${latestWeight?.weight || 'Not logged'} lbs
-- Target Weight: ${user.targetWeight} lbs
-- Start Weight: ${user.startWeight} lbs
+- Target Weight: ${user.targetWeight || 'Not set'} lbs
+- Start Weight: ${user.startWeight || 'Not set'} lbs
 - Current Streak: ${streak?.currentStreak || 0} days
 - Today's Calories: ${nutrition.calories}/${user.dailyCalorieTarget}
 - Today's Protein: ${nutrition.protein}g/${user.dailyProteinTarget}g
@@ -466,7 +409,6 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
         { role: "user", content: userMessage }
       ];
 
-      // Generate AI response or use fallback
       let aiResponse = "I'm here to help with your health journey! What would you like to know about nutrition, fasting, or your progress?";
       
       if (openai) {
@@ -482,13 +424,11 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
           aiResponse = getFallbackResponse(userMessage);
         }
       } else {
-        // No OpenAI key configured, use intelligent fallbacks
         aiResponse = getFallbackResponse(userMessage);
       }
       
-      // Save AI response
       const savedResponse = await storage.createChatMessage({
-        userId: user.id,
+        userId,
         role: "assistant",
         content: aiResponse,
       });
@@ -502,12 +442,10 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
     }
   });
 
-  app.delete("/api/chat", async (req, res) => {
+  app.delete("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) return res.status(404).json({ error: "User not found" });
-      
-      await storage.clearChatHistory(user.id);
+      const userId = req.user.claims.sub;
+      await storage.clearChatHistory(userId);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to clear chat history" });
@@ -524,7 +462,6 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
       }
 
       if (!SPOONACULAR_API_KEY) {
-        // Fallback mock data when no API key
         return res.json({
           results: [
             { id: 1, name: "Chicken Breast", calories: 165, protein: 31, carbs: 0, fat: 3.6, servingSize: "100g" },
@@ -544,7 +481,6 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
 
       const data = await response.json();
       
-      // Get nutrition info for each ingredient
       const results = await Promise.all(
         data.results.slice(0, 5).map(async (item: any) => {
           try {
@@ -587,28 +523,34 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
 
   // ============ Dashboard Summary Route ============
   
-  app.get("/api/dashboard", async (req, res) => {
+  app.get("/api/dashboard", isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUserByUsername("demo");
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
       if (!user) return res.status(404).json({ error: "User not found" });
       
       const today = new Date().toISOString().split('T')[0];
       const [latestWeight, streak, nutrition, weightLogs, activeSession] = await Promise.all([
-        storage.getLatestWeight(user.id),
-        storage.getStreak(user.id),
-        storage.getDailyNutrition(user.id, today),
-        storage.getWeightLogs(user.id, 30),
-        storage.getActiveFastingSession(user.id),
+        storage.getLatestWeight(userId),
+        storage.getStreak(userId),
+        storage.getDailyNutrition(userId, today),
+        storage.getWeightLogs(userId, 30),
+        storage.getActiveFastingSession(userId),
       ]);
       
-      // Calculate days active
       const daysActive = weightLogs.length > 0 
         ? Math.ceil((Date.now() - new Date(weightLogs[weightLogs.length - 1].createdAt!).getTime()) / (1000 * 60 * 60 * 24))
         : 0;
       
+      const displayName = user.firstName || user.email?.split('@')[0] || 'User';
+      
       res.json({
         user: {
-          name: user.name,
+          name: displayName,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          profileImageUrl: user.profileImageUrl,
           targetWeight: user.targetWeight,
           startWeight: user.startWeight,
           dailyCalorieTarget: user.dailyCalorieTarget,

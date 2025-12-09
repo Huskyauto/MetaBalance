@@ -1,5 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   LayoutDashboard,
   Utensils,
@@ -11,8 +19,11 @@ import {
   Menu,
   X,
   Activity,
+  LogOut,
+  User,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavigationProps {
   currentPage: string;
@@ -31,6 +42,30 @@ const navItems = [
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+
+  const getUserInitials = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    if (user?.firstName) {
+      return user.firstName[0].toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return "U";
+  };
+
+  const getUserDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user?.firstName) {
+      return user.firstName;
+    }
+    return user?.email || "User";
+  };
 
   return (
     <>
@@ -61,9 +96,36 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" className="hidden" data-testid="button-settings">
-              <Settings className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full" data-testid="button-user-menu">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.profileImageUrl || undefined} alt={getUserDisplayName()} />
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium" data-testid="text-user-name">{getUserDisplayName()}</p>
+                  {user?.email && (
+                    <p className="text-xs text-muted-foreground" data-testid="text-user-email">{user.email}</p>
+                  )}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onNavigate("settings")} data-testid="menu-settings">
+                  <User className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild data-testid="menu-logout">
+                  <a href="/api/logout" className="w-full">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="ghost"
               size="icon"

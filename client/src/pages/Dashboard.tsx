@@ -78,7 +78,10 @@ export function Dashboard() {
     );
   }
 
-  const weightToGo = data.currentWeight - data.user.targetWeight;
+  const currentWeight = data.currentWeight ?? data.user.startWeight ?? 0;
+  const targetWeight = data.user.targetWeight ?? 0;
+  const startWeight = data.user.startWeight ?? currentWeight;
+  const weightToGo = targetWeight > 0 ? currentWeight - targetWeight : 0;
   const caloriesRemaining = data.nutrition.targets.calories - data.nutrition.current.calories;
 
   // Format weight history for chart
@@ -87,20 +90,23 @@ export function Dashboard() {
     weight: log.weight,
   }));
 
+  const userName = data.user.name || "there";
+  const weightLost = startWeight - currentWeight;
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold" data-testid="text-welcome">Welcome back, {data.user.name}</h1>
+        <h1 className="text-2xl font-bold" data-testid="text-welcome">Welcome back, {userName}</h1>
         <p className="text-muted-foreground">Here's your health overview for today</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Current Weight"
-          value={data.currentWeight.toFixed(1)}
+          value={currentWeight > 0 ? currentWeight.toFixed(1) : "--"}
           unit="lbs"
-          trend={data.currentWeight < data.user.startWeight ? "down" : "neutral"}
-          trendValue={`${(data.user.startWeight - data.currentWeight).toFixed(1)} lbs lost`}
+          trend={currentWeight < startWeight ? "down" : "neutral"}
+          trendValue={weightLost > 0 ? `${weightLost.toFixed(1)} lbs lost` : "Start tracking!"}
           icon={<Scale className="h-6 w-6" />}
         />
         <MetricCard
@@ -113,15 +119,15 @@ export function Dashboard() {
         />
         <MetricCard
           title="Target Weight"
-          value={data.user.targetWeight.toString()}
+          value={targetWeight > 0 ? targetWeight.toString() : "--"}
           unit="lbs"
           trend="up"
-          trendValue={`${weightToGo.toFixed(1)} lbs to go`}
+          trendValue={weightToGo > 0 ? `${weightToGo.toFixed(1)} lbs to go` : "Set a goal!"}
           icon={<Target className="h-6 w-6" />}
         />
         <MetricCard
           title="Days Active"
-          value={data.daysActive.toString()}
+          value={(data.daysActive ?? 0).toString()}
           unit="days"
           trend="up"
           trendValue="Keep it up!"

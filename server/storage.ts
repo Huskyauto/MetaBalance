@@ -1,6 +1,6 @@
 import { 
   users, weightLogs, meals, fastingSessions, dailyGoals, streaks, chatMessages,
-  type User, type InsertUser,
+  type User, type InsertUser, type UpsertUser,
   type WeightLog, type InsertWeightLog,
   type Meal, type InsertMeal,
   type FastingSession, type InsertFastingSession,
@@ -14,8 +14,7 @@ import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, data: Partial<InsertUser>): Promise<User | undefined>;
   
   // Weight Logs
@@ -57,18 +56,23 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
     return user;
   }
 
   async updateUser(id: string, data: Partial<InsertUser>): Promise<User | undefined> {
-    const [user] = await db.update(users).set(data).where(eq(users.id, id)).returning();
+    const [user] = await db.update(users).set({ ...data, updatedAt: new Date() }).where(eq(users.id, id)).returning();
     return user || undefined;
   }
 

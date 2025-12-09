@@ -1,15 +1,26 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, integer, real, boolean, timestamp, date, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, real, boolean, timestamp, date, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users table
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table - updated for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  name: text("name").notNull().default("User"),
-  email: text("email"),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
   targetWeight: real("target_weight"),
   startWeight: real("start_weight"),
   heightInches: integer("height_inches"),
@@ -19,6 +30,7 @@ export const users = pgTable("users", {
   dailyFatTarget: integer("daily_fat_target").default(65),
   preferredFastingProtocol: text("preferred_fasting_protocol").default("16:8"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -146,8 +158,17 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
 }));
 
 // Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertWeightLogSchema = createInsertSchema(weightLogs).omit({ id: true, createdAt: true });
+
+// Auth types for Replit Auth
+export type UpsertUser = {
+  id: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  profileImageUrl?: string | null;
+};
 export const insertMealSchema = createInsertSchema(meals).omit({ id: true, createdAt: true });
 export const insertFastingSessionSchema = createInsertSchema(fastingSessions).omit({ id: true, createdAt: true });
 export const insertDailyGoalSchema = createInsertSchema(dailyGoals).omit({ id: true, createdAt: true });

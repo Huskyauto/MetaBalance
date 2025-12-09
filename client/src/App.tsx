@@ -12,8 +12,10 @@ import { Fasting } from "@/pages/Fasting";
 import { Coach } from "@/pages/Coach";
 import { Research } from "@/pages/Research";
 import Settings from "@/pages/Settings";
+import { Landing } from "@/pages/Landing";
+import { useAuth } from "@/hooks/useAuth";
 
-function App() {
+function AuthenticatedApp() {
   const [currentPage, setCurrentPage] = useState("dashboard");
 
   const renderPage = () => {
@@ -38,15 +40,39 @@ function App() {
   };
 
   return (
+    <div className="min-h-screen bg-background">
+      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+      <main className="container mx-auto max-w-7xl px-4 py-6">
+        {renderPage()}
+      </main>
+      <QuickActions />
+    </div>
+  );
+}
+
+function AppContent() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Landing />;
+  }
+
+  return <AuthenticatedApp />;
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-background">
-          <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-          <main className="container mx-auto max-w-7xl px-4 py-6">
-            {renderPage()}
-          </main>
-          <QuickActions />
-        </div>
+        <AppContent />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
