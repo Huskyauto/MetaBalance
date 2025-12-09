@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { RotateCcw, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 interface MealLogCardProps {
@@ -14,6 +14,7 @@ interface MealLogCardProps {
   servingSize: string;
   time: string;
   onLogAgain?: () => void;
+  onDelete?: () => void;
 }
 
 export function MealLogCard({
@@ -26,6 +27,7 @@ export function MealLogCard({
   servingSize,
   time,
   onLogAgain,
+  onDelete,
 }: MealLogCardProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -70,16 +72,29 @@ export function MealLogCard({
             {expanded ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
             Details
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onLogAgain}
-            className="text-primary"
-            data-testid="button-log-again"
-          >
-            <RotateCcw className="h-4 w-4 mr-1" />
-            Log Again
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onLogAgain}
+              className="text-primary"
+              data-testid="button-log-again"
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Log Again
+            </Button>
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                className="text-destructive"
+                data-testid="button-delete-meal"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {expanded && (

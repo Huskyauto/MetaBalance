@@ -1,40 +1,96 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { FoodSearch } from "@/components/FoodSearch";
 import { MealLogCard } from "@/components/MealLogCard";
 import { NutritionProgress } from "@/components/NutritionProgress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Coffee, Sun, Moon, Cookie } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { Meal } from "@shared/schema";
 
-// todo: remove mock functionality
-const mockMeals = {
-  breakfast: [
-    { id: "1", name: "Greek Yogurt with Berries", calories: 180, protein: 15, carbs: 24, fat: 3, servingSize: "1 cup", time: "8:00 AM" },
-    { id: "2", name: "Whole Grain Toast", calories: 120, protein: 4, carbs: 22, fat: 2, servingSize: "2 slices", time: "8:00 AM" },
-  ],
-  lunch: [
-    { id: "3", name: "Grilled Chicken Salad", calories: 420, protein: 38, carbs: 22, fat: 18, servingSize: "1 bowl", time: "12:30 PM" },
-  ],
-  dinner: [
-    { id: "4", name: "Salmon with Vegetables", calories: 480, protein: 35, carbs: 28, fat: 22, servingSize: "1 plate", time: "7:00 PM" },
-  ],
-  snack: [
-    { id: "5", name: "Almonds", calories: 165, protein: 6, carbs: 6, fat: 14, servingSize: "1 oz", time: "3:00 PM" },
-  ],
-};
+interface NutritionData {
+  current: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  targets: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+}
 
 export function DietaryTracking() {
   const [activeTab, setActiveTab] = useState("all");
+  const today = new Date().toISOString().split('T')[0];
 
-  const allMeals = [...mockMeals.breakfast, ...mockMeals.lunch, ...mockMeals.dinner, ...mockMeals.snack];
-  const displayMeals = activeTab === "all" ? allMeals : mockMeals[activeTab as keyof typeof mockMeals] || [];
+  const { data: meals = [], isLoading: mealsLoading } = useQuery<Meal[]>({
+    queryKey: ['/api/meals', today],
+    queryFn: async () => {
+      const response = await fetch(`/api/meals?date=${today}`);
+      if (!response.ok) throw new Error('Failed to fetch meals');
+      return response.json();
+    },
+  });
 
-  const getMealType = (id: string): "breakfast" | "lunch" | "dinner" | "snack" => {
-    if (mockMeals.breakfast.find(m => m.id === id)) return "breakfast";
-    if (mockMeals.lunch.find(m => m.id === id)) return "lunch";
-    if (mockMeals.dinner.find(m => m.id === id)) return "dinner";
-    return "snack";
+  const { data: nutritionData, isLoading: nutritionLoading } = useQuery<NutritionData>({
+    queryKey: ['/api/nutrition', today],
+    queryFn: async () => {
+      const response = await fetch(`/api/nutrition/${today}`);
+      if (!response.ok) throw new Error('Failed to fetch nutrition');
+      return response.json();
+    },
+  });
+
+  const deleteMealMutation = useMutation({
+    mutationFn: async (mealId: string) => {
+      await apiRequest("DELETE", `/api/meals/${mealId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/meals', today] });
+      queryClient.invalidateQueries({ queryKey: ['/api/nutrition', today] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard'] });
+    },
+  });
+
+  const groupedMeals = {
+    breakfast: meals.filter(m => m.mealType === 'breakfast'),
+    lunch: meals.filter(m => m.mealType === 'lunch'),
+    dinner: meals.filter(m => m.mealType === 'dinner'),
+    snack: meals.filter(m => m.mealType === 'snack'),
   };
+
+  const displayMeals = activeTab === "all" 
+    ? meals 
+    : groupedMeals[activeTab as keyof typeof groupedMeals] || [];
+
+  const formatTime = (time: string | null) => {
+    if (!time) return "";
+    return time;
+  };
+
+  if (mealsLoading || nutritionLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dietary Tracking</h1>
+          <p className="text-muted-foreground">Log and track your daily meals</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-80 w-full" />
+          </div>
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -79,18 +135,19 @@ export function DietaryTracking() {
                       <MealLogCard
                         key={meal.id}
                         name={meal.name}
-                        mealType={getMealType(meal.id)}
+                        mealType={meal.mealType as "breakfast" | "lunch" | "dinner" | "snack"}
                         calories={meal.calories}
-                        protein={meal.protein}
-                        carbs={meal.carbs}
-                        fat={meal.fat}
-                        servingSize={meal.servingSize}
-                        time={meal.time}
+                        protein={meal.protein || 0}
+                        carbs={meal.carbs || 0}
+                        fat={meal.fat || 0}
+                        servingSize={meal.servingSize || "1 serving"}
+                        time={formatTime(meal.time)}
                         onLogAgain={() => console.log("Log again:", meal.name)}
+                        onDelete={() => deleteMealMutation.mutate(meal.id)}
                       />
                     ))
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-muted-foreground" data-testid="text-no-meals">
                       No meals logged yet. Start by searching for foods above.
                     </div>
                   )}
@@ -102,11 +159,32 @@ export function DietaryTracking() {
 
         <div>
           <NutritionProgress
-            calories={{ current: 1365, target: 2000 }}
+            calories={{ 
+              current: nutritionData?.current?.calories || 0, 
+              target: nutritionData?.targets?.calories || 2000 
+            }}
             nutrients={[
-              { name: "Protein", current: 98, target: 120, unit: "g", color: "text-blue-500" },
-              { name: "Carbs", current: 102, target: 200, unit: "g", color: "text-green-500" },
-              { name: "Fat", current: 59, target: 65, unit: "g", color: "text-yellow-500" },
+              { 
+                name: "Protein", 
+                current: nutritionData?.current?.protein || 0, 
+                target: nutritionData?.targets?.protein || 120, 
+                unit: "g", 
+                color: "text-blue-500" 
+              },
+              { 
+                name: "Carbs", 
+                current: nutritionData?.current?.carbs || 0, 
+                target: nutritionData?.targets?.carbs || 200, 
+                unit: "g", 
+                color: "text-green-500" 
+              },
+              { 
+                name: "Fat", 
+                current: nutritionData?.current?.fat || 0, 
+                target: nutritionData?.targets?.fat || 65, 
+                unit: "g", 
+                color: "text-yellow-500" 
+              },
             ]}
           />
         </div>
