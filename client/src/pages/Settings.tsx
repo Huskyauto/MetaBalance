@@ -11,7 +11,8 @@ import { Settings as SettingsIcon, Save, Loader2 } from "lucide-react";
 
 interface UserSettings {
   id: string;
-  name: string;
+  firstName: string | null;
+  lastName: string | null;
   targetWeight: number | null;
   startWeight: number | null;
   heightInches: number | null;
@@ -33,7 +34,8 @@ export default function Settings() {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         targetWeight: user.targetWeight,
         startWeight: user.startWeight,
         heightInches: user.heightInches,
@@ -48,11 +50,7 @@ export default function Settings() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<UserSettings>) => {
-      return apiRequest("/api/user", {
-        method: "PATCH",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("PATCH", "/api/user", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
@@ -101,15 +99,27 @@ export default function Settings() {
             <CardTitle>Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={formData.name || ""}
-                onChange={(e) => handleChange("name", e.target.value)}
-                placeholder="Your name"
-                data-testid="input-name"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName || ""}
+                  onChange={(e) => handleChange("firstName", e.target.value)}
+                  placeholder="First name"
+                  data-testid="input-first-name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName || ""}
+                  onChange={(e) => handleChange("lastName", e.target.value)}
+                  placeholder="Last name"
+                  data-testid="input-last-name"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
