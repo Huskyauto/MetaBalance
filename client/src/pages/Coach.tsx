@@ -1,97 +1,189 @@
-import { AICoachChat } from "@/components/AICoachChat";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Lightbulb, TrendingUp, Heart, Zap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Send, Bot, User, Trash2, Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// todo: remove mock functionality
-const suggestedTopics = [
-  { id: "1", label: "How can I break a weight loss plateau?", icon: TrendingUp },
-  { id: "2", label: "Best protein sources for my diet", icon: Heart },
-  { id: "3", label: "Tips for reducing cravings", icon: Zap },
-  { id: "4", label: "Should I try a different fasting protocol?", icon: Lightbulb },
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
+const quickPrompts = [
+  "How can I stay motivated?",
+  "Tips for breaking a plateau",
+  "Best foods for protein",
+  "How does fasting help?",
 ];
 
-const dailyInsight = {
-  title: "Your Daily Insight",
-  message: "Based on your recent progress, you're on track to reach your goal by February 15th. Your protein intake has improved significantly this week - keep it up! Consider adding more fiber to help with satiety during your fasting windows.",
-};
-
 export function Coach() {
+  const [message, setMessage] = useState("");
+
+  const { data: messages, isLoading } = useQuery<ChatMessage[]>({
+    queryKey: ["/api/chat"],
+  });
+
+  const sendMessage = useMutation({
+    mutationFn: async (content: string) => {
+      return apiRequest("POST", "/api/chat", { message: content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      setMessage("");
+    },
+  });
+
+  const clearHistory = useMutation({
+    mutationFn: async () => {
+      return apiRequest("DELETE", "/api/chat");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || sendMessage.isPending) return;
+    sendMessage.mutate(message.trim());
+  };
+
+  const handleQuickPrompt = (prompt: string) => {
+    if (sendMessage.isPending) return;
+    sendMessage.mutate(prompt);
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          AI Health Coach
-          <Sparkles className="h-6 w-6 text-primary" />
-        </h1>
-        <p className="text-muted-foreground">Get personalized advice powered by advanced AI</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">AI Health Coach</h1>
+          <p className="text-muted-foreground">Get personalized advice and motivation</p>
+        </div>
+        {messages && messages.length > 0 && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => clearHistory.mutate()}
+            disabled={clearHistory.isPending}
+            data-testid="button-clear-chat"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Clear History
+          </Button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <AICoachChat />
-        </div>
-
-        <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                {dailyInsight.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{dailyInsight.message}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Lightbulb className="h-5 w-5" />
-                Suggested Topics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {suggestedTopics.map((topic) => (
-                <Button
-                  key={topic.id}
-                  variant="ghost"
-                  className="w-full justify-start text-left h-auto py-3"
-                  data-testid={`topic-${topic.id}`}
-                >
-                  <topic.icon className="h-4 w-4 mr-3 shrink-0 text-primary" />
-                  <span className="text-sm">{topic.label}</span>
-                </Button>
+      <Card className="h-[calc(100vh-280px)] flex flex-col">
+        <CardHeader className="border-b py-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" />
+            Coach
+          </CardTitle>
+        </CardHeader>
+        
+        <ScrollArea className="flex-1 p-4">
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className={`flex gap-3 ${i % 2 === 0 ? "justify-end" : ""}`}>
+                  <Skeleton className="h-16 w-3/4 rounded-lg" />
+                </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          ) : messages && messages.length > 0 ? (
+            <div className="space-y-4">
+              {messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
+                  data-testid={`message-${msg.id}`}
+                >
+                  {msg.role === "assistant" && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="h-4 w-4 text-primary" />
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-[75%] rounded-lg px-4 py-2 ${
+                      msg.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <p className="text-sm">{msg.content}</p>
+                  </div>
+                  {msg.role === "user" && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                      <User className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+              ))}
+              {sendMessage.isPending && (
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-primary animate-pulse" />
+                  </div>
+                  <div className="bg-muted rounded-lg px-4 py-2">
+                    <p className="text-sm text-muted-foreground">Thinking...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center p-6">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Sparkles className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Start a Conversation</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+                Ask me anything about nutrition, fasting, exercise, or your health journey. I'm here to help!
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {quickPrompts.map((prompt) => (
+                  <Button
+                    key={prompt}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickPrompt(prompt)}
+                    disabled={sendMessage.isPending}
+                    data-testid={`button-prompt-${prompt.slice(0, 10)}`}
+                  >
+                    {prompt}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+        </ScrollArea>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4 mb-3">
-                <span className="text-sm font-medium">Chat Sessions</span>
-                <Badge variant="secondary">This Week</Badge>
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold">12</p>
-                  <p className="text-xs text-muted-foreground">Messages</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">4</p>
-                  <p className="text-xs text-muted-foreground">Sessions</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">8</p>
-                  <p className="text-xs text-muted-foreground">Tips</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        <CardContent className="border-t p-4">
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Ask your health coach..."
+              disabled={sendMessage.isPending}
+              data-testid="input-chat-message"
+            />
+            <Button 
+              type="submit" 
+              size="icon" 
+              disabled={!message.trim() || sendMessage.isPending}
+              data-testid="button-send-message"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,150 +1,182 @@
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { FastingTimer } from "@/components/FastingTimer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Timer, Info, CheckCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { Clock, CheckCircle, XCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const fastingProtocols = [
-  {
-    id: "16-8",
-    name: "16:8 TRE",
-    description: "Time-Restricted Eating",
-    fastingHours: 16,
-    eatingHours: 8,
-    benefits: ["Easy to follow", "Improves insulin sensitivity", "Fits most schedules"],
-    recommended: true,
-  },
-  {
-    id: "18-6",
-    name: "18:6",
-    description: "Extended TRE",
-    fastingHours: 18,
-    eatingHours: 6,
-    benefits: ["Enhanced fat burning", "Deeper autophagy", "More ketosis time"],
-    recommended: false,
-  },
-  {
-    id: "adf",
-    name: "ADF",
-    description: "Alternate Day Fasting",
-    fastingHours: 36,
-    eatingHours: 12,
-    benefits: ["Maximum metabolic reset", "Higher weight loss", "Improved longevity markers"],
-    recommended: false,
-  },
-];
+interface FastingSession {
+  id: string;
+  protocol: string;
+  startTime: string;
+  endTime?: string;
+  targetDurationHours: number;
+  actualDurationMinutes?: number;
+  completed: boolean;
+}
 
-// todo: remove mock functionality
-const recentFasts = [
-  { date: "Dec 5", duration: "16:42", completed: true },
-  { date: "Dec 4", duration: "15:30", completed: true },
-  { date: "Dec 3", duration: "16:15", completed: true },
-  { date: "Dec 2", duration: "14:45", completed: false },
-  { date: "Dec 1", duration: "16:00", completed: true },
+const protocols = [
+  { value: "16:8", label: "16:8 (16h fast, 8h eating)", hours: 16 },
+  { value: "18:6", label: "18:6 (18h fast, 6h eating)", hours: 18 },
+  { value: "20:4", label: "20:4 (20h fast, 4h eating)", hours: 20 },
+  { value: "OMAD", label: "OMAD (23h fast, 1h eating)", hours: 23 },
 ];
 
 export function Fasting() {
+  const [selectedProtocol, setSelectedProtocol] = useState("16:8");
+
+  const { data: activeSession, isLoading: loadingActive } = useQuery<FastingSession | null>({
+    queryKey: ["/api/fasting/active"],
+  });
+
+  const { data: history, isLoading: loadingHistory } = useQuery<FastingSession[]>({
+    queryKey: ["/api/fasting/history"],
+  });
+
+  const startFast = useMutation({
+    mutationFn: async () => {
+      const protocol = protocols.find(p => p.value === selectedProtocol);
+      return apiRequest("POST", "/api/fasting/start", { 
+        protocol: selectedProtocol,
+        targetDurationHours: protocol?.hours || 16,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/fasting/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/fasting/history"] });
+    },
+  });
+
+  const endFast = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest("POST", `/api/fasting/${id}/end`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/fasting/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/fasting/history"] });
+    },
+  });
+
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
+  if (loadingActive) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-96 rounded-lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Intermittent Fasting</h1>
-        <p className="text-muted-foreground">Track your fasting windows and protocols</p>
+        <p className="text-muted-foreground">Track your fasting windows and build consistency</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <FastingTimer protocol="16:8 TRE" targetHours={16} />
+      {activeSession ? (
+        <FastingTimer
+          startTime={new Date(activeSession.startTime)}
+          targetHours={activeSession.targetDurationHours}
+          protocol={activeSession.protocol}
+          onEnd={() => endFast.mutate(activeSession.id)}
+          isEnding={endFast.isPending}
+        />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Start a New Fast</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Protocol</label>
+              <Select value={selectedProtocol} onValueChange={setSelectedProtocol}>
+                <SelectTrigger data-testid="select-protocol">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {protocols.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              className="w-full" 
+              onClick={() => startFast.mutate()}
+              disabled={startFast.isPending}
+              data-testid="button-start-fast"
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              {startFast.isPending ? "Starting..." : "Start Fasting"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Timer className="h-5 w-5" />
-                Fasting Protocols
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {fastingProtocols.map((protocol) => (
-                  <div
-                    key={protocol.id}
-                    className={`p-4 rounded-lg border hover-elevate cursor-pointer ${
-                      protocol.recommended ? "border-primary bg-primary/5" : "bg-muted/50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="font-semibold">{protocol.name}</span>
-                      {protocol.recommended && (
-                        <Badge className="bg-primary">Recommended</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{protocol.description}</p>
-                    <div className="text-2xl font-bold mb-3">
-                      {protocol.fastingHours}:{protocol.eatingHours}
-                    </div>
-                    <ul className="space-y-1">
-                      {protocol.benefits.map((benefit, i) => (
-                        <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      variant={protocol.recommended ? "default" : "outline"}
-                      size="sm"
-                      className="w-full mt-4"
-                      data-testid={`button-select-${protocol.id}`}
-                    >
-                      {protocol.recommended ? "Currently Active" : "Select Protocol"}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold">Recent Fasts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentFasts.map((fast, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between gap-4 p-3 rounded-md bg-muted/50"
-                  >
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Recent Fasts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingHistory ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 rounded-md" />
+              ))}
+            </div>
+          ) : history && history.length > 0 ? (
+            <div className="space-y-3">
+              {history.filter(s => s.completed).slice(0, 5).map((session) => (
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between p-3 rounded-md bg-muted/50"
+                  data-testid={`history-${session.id}`}
+                >
+                  <div className="flex items-center gap-3">
+                    {session.actualDurationMinutes && session.actualDurationMinutes >= session.targetDurationHours * 60 ? (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-yellow-500" />
+                    )}
                     <div>
-                      <p className="font-medium">{fast.date}</p>
-                      <p className="text-sm text-muted-foreground">{fast.duration}</p>
+                      <p className="font-medium">{session.protocol}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(session.startTime).toLocaleDateString()}
+                      </p>
                     </div>
-                    <Badge variant={fast.completed ? "default" : "secondary"}>
-                      {fast.completed ? "Completed" : "Incomplete"}
-                    </Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-blue-500/10 border-blue-500/20">
-            <CardContent className="p-4">
-              <div className="flex gap-3">
-                <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">Fasting Benefits</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Regular fasting improves insulin sensitivity, promotes autophagy 
-                    (cellular cleanup), and can enhance fat burning by up to 30%.
-                  </p>
+                  <div className="text-right">
+                    <p className="font-medium">
+                      {session.actualDurationMinutes ? formatDuration(session.actualDurationMinutes) : "In progress"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Target: {session.targetDurationHours}h
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-8">
+              No fasting history yet. Start your first fast above!
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
