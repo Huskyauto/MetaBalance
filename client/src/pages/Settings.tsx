@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Save, Loader2 } from "lucide-react";
+import { Settings as SettingsIcon, Save, Loader2, Calculator } from "lucide-react";
 
 interface UserSettings {
   id: string;
   firstName: string | null;
   lastName: string | null;
+  age: number | null;
+  gender: string | null;
+  activityLevel: string | null;
   targetWeight: number | null;
   startWeight: number | null;
   heightInches: number | null;
@@ -21,6 +24,52 @@ interface UserSettings {
   dailyCarbsTarget: number;
   dailyFatTarget: number;
   preferredFastingProtocol: string;
+}
+
+const activityMultipliers: Record<string, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  active: 1.725,
+  very_active: 1.9,
+};
+
+function calculateNutrition(
+  weight: number,
+  heightInches: number,
+  age: number,
+  gender: string,
+  activityLevel: string,
+  targetWeight: number
+): { calories: number; protein: number; carbs: number; fat: number } {
+  const heightCm = heightInches * 2.54;
+  const weightKg = weight * 0.453592;
+  const targetWeightKg = targetWeight * 0.453592;
+  
+  let bmr: number;
+  if (gender === "male") {
+    bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+  } else {
+    bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+  }
+  
+  const multiplier = activityMultipliers[activityLevel] || 1.55;
+  let tdee = Math.round(bmr * multiplier);
+  
+  if (targetWeight < weight) {
+    tdee = Math.round(tdee * 0.8);
+  } else if (targetWeight > weight) {
+    tdee = Math.round(tdee * 1.1);
+  }
+  
+  const protein = Math.round(targetWeightKg * 2.2);
+  const fat = Math.round((tdee * 0.25) / 9);
+  const proteinCalories = protein * 4;
+  const fatCalories = fat * 9;
+  const carbCalories = tdee - proteinCalories - fatCalories;
+  const carbs = Math.round(carbCalories / 4);
+  
+  return { calories: tdee, protein, carbs, fat };
 }
 
 export default function Settings() {
@@ -36,6 +85,9 @@ export default function Settings() {
       setFormData({
         firstName: user.firstName,
         lastName: user.lastName,
+        age: user.age,
+        gender: user.gender,
+        activityLevel: user.activityLevel || "moderate",
         targetWeight: user.targetWeight,
         startWeight: user.startWeight,
         heightInches: user.heightInches,
@@ -74,8 +126,43 @@ export default function Settings() {
     updateMutation.mutate(formData);
   };
 
-  const handleChange = (field: keyof UserSettings, value: string | number) => {
+  const handleChange = (field: keyof UserSettings, value: string | number | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCalculateNutrition = () => {
+    const { startWeight, heightInches, age, gender, activityLevel, targetWeight } = formData;
+    
+    if (!startWeight || !heightInches || !age || !gender || !activityLevel) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in your weight, height, age, gender, and activity level to calculate recommendations.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const result = calculateNutrition(
+      startWeight,
+      heightInches,
+      age,
+      gender,
+      activityLevel,
+      targetWeight || startWeight
+    );
+    
+    setFormData((prev) => ({
+      ...prev,
+      dailyCalorieTarget: result.calories,
+      dailyProteinTarget: result.protein,
+      dailyCarbsTarget: result.carbs,
+      dailyFatTarget: result.fat,
+    }));
+    
+    toast({
+      title: "Nutrition Calculated",
+      description: `Recommended: ${result.calories} calories, ${result.protein}g protein, ${result.carbs}g carbs, ${result.fat}g fat`,
+    });
   };
 
   if (isLoading) {
@@ -122,6 +209,53 @@ export default function Settings() {
               </div>
             </div>
 
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={formData.age || ""}
+                  onChange={(e) => handleChange("age", parseInt(e.target.value) || null)}
+                  placeholder="30"
+                  data-testid="input-age"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select
+                  value={formData.gender || ""}
+                  onValueChange={(value) => handleChange("gender", value)}
+                >
+                  <SelectTrigger data-testid="select-gender">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="activity">Activity Level</Label>
+                <Select
+                  value={formData.activityLevel || "moderate"}
+                  onValueChange={(value) => handleChange("activityLevel", value)}
+                >
+                  <SelectTrigger data-testid="select-activity">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sedentary">Sedentary</SelectItem>
+                    <SelectItem value="light">Light Exercise</SelectItem>
+                    <SelectItem value="moderate">Moderate Exercise</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="very_active">Very Active</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="heightFeet">Height (feet)</Label>
@@ -164,7 +298,7 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startWeight">Starting Weight (lbs)</Label>
+                <Label htmlFor="startWeight">Current Weight (lbs)</Label>
                 <Input
                   id="startWeight"
                   type="number"
@@ -190,8 +324,20 @@ export default function Settings() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Daily Nutrition Targets</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between gap-4 flex-wrap">
+            <div>
+              <CardTitle>Daily Nutrition Targets</CardTitle>
+              <CardDescription>Set your daily nutrition goals or calculate based on your profile</CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCalculateNutrition}
+              data-testid="button-calculate"
+            >
+              <Calculator className="h-4 w-4 mr-2" />
+              Calculate
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">

@@ -21,6 +21,9 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  age: integer("age"),
+  gender: text("gender"), // male, female
+  activityLevel: text("activity_level").default("moderate"), // sedentary, light, moderate, active, very_active
   targetWeight: real("target_weight"),
   startWeight: real("start_weight"),
   heightInches: integer("height_inches"),
