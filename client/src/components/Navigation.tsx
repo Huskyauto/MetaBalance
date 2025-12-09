@@ -26,6 +26,7 @@ const navItems = [
   { id: "fasting", label: "Fasting", icon: Timer },
   { id: "coach", label: "AI Coach", icon: Bot },
   { id: "research", label: "Research", icon: BookOpen },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {

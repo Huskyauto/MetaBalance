@@ -11,6 +11,7 @@ import { Progress } from "@/pages/Progress";
 import { Fasting } from "@/pages/Fasting";
 import { Coach } from "@/pages/Coach";
 import { Research } from "@/pages/Research";
+import Settings from "@/pages/Settings";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -29,6 +30,8 @@ function App() {
         return <Coach />;
       case "research":
         return <Research />;
+      case "settings":
+        return <Settings />;
       default:
         return <Dashboard />;
     }
