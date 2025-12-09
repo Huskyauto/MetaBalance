@@ -9,8 +9,11 @@ import {
 import { z } from "zod";
 import OpenAI from "openai";
 
-const openai = process.env.OPENAI_API_KEY 
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const openai = process.env.AI_INTEGRATIONS_OPENAI_API_KEY 
+  ? new OpenAI({ 
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL
+    })
   : null;
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;

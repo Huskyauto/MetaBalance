@@ -60,22 +60,21 @@ export function FoodSearch({ onAddFood }: FoodSearchProps) {
         <CardTitle className="text-lg font-semibold">Search Foods</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Search for a food..."
               className="pl-9"
               data-testid="input-food-search"
             />
           </div>
-          <Button onClick={handleSearch} disabled={isSearching} data-testid="button-search">
+          <Button type="submit" disabled={!query.trim() || isSearching} data-testid="button-search">
             {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
           </Button>
-        </div>
+        </form>
 
         {error && (
           <p className="text-sm text-destructive">{error}</p>
