@@ -13,6 +13,10 @@ const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
+// Spoonacular API configuration
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+const SPOONACULAR_BASE_URL = "https://api.spoonacular.com";
+
 // Demo user ID for development (in production, this would come from auth)
 const DEMO_USER_ID = "demo-user";
 
@@ -507,6 +511,77 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to clear chat history" });
+    }
+  });
+
+  // ============ Food Search Routes (Spoonacular) ============
+  
+  app.get("/api/food/search", async (req, res) => {
+    try {
+      const query = req.query.query as string;
+      if (!query) {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+
+      if (!SPOONACULAR_API_KEY) {
+        // Fallback mock data when no API key
+        return res.json({
+          results: [
+            { id: 1, name: "Chicken Breast", calories: 165, protein: 31, carbs: 0, fat: 3.6, servingSize: "100g" },
+            { id: 2, name: "Brown Rice", calories: 112, protein: 2.6, carbs: 24, fat: 0.9, servingSize: "100g" },
+            { id: 3, name: "Broccoli", calories: 34, protein: 2.8, carbs: 7, fat: 0.4, servingSize: "100g" },
+          ]
+        });
+      }
+
+      const response = await fetch(
+        `${SPOONACULAR_BASE_URL}/food/ingredients/search?query=${encodeURIComponent(query)}&number=10&apiKey=${SPOONACULAR_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Spoonacular API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Get nutrition info for each ingredient
+      const results = await Promise.all(
+        data.results.slice(0, 5).map(async (item: any) => {
+          try {
+            const nutritionResponse = await fetch(
+              `${SPOONACULAR_BASE_URL}/food/ingredients/${item.id}/information?amount=100&unit=grams&apiKey=${SPOONACULAR_API_KEY}`
+            );
+            
+            if (nutritionResponse.ok) {
+              const nutritionData = await nutritionResponse.json();
+              const nutrients = nutritionData.nutrition?.nutrients || [];
+              
+              const getAmount = (name: string) => {
+                const nutrient = nutrients.find((n: any) => n.name.toLowerCase() === name.toLowerCase());
+                return nutrient ? Math.round(nutrient.amount) : 0;
+              };
+              
+              return {
+                id: item.id,
+                name: item.name.charAt(0).toUpperCase() + item.name.slice(1),
+                calories: getAmount("Calories"),
+                protein: getAmount("Protein"),
+                carbs: getAmount("Carbohydrates"),
+                fat: getAmount("Fat"),
+                servingSize: "100g",
+              };
+            }
+            return null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      res.json({ results: results.filter(Boolean) });
+    } catch (error) {
+      console.error("Food search error:", error);
+      res.status(500).json({ error: "Failed to search food" });
     }
   });
 

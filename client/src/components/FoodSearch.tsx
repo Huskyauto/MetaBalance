@@ -16,16 +16,6 @@ interface FoodItem {
   servingSize: string;
 }
 
-// todo: remove mock functionality
-const mockFoods: FoodItem[] = [
-  { id: "1", name: "Grilled Chicken Breast", calories: 165, protein: 31, carbs: 0, fat: 3.6, servingSize: "100g" },
-  { id: "2", name: "Brown Rice", calories: 216, protein: 5, carbs: 45, fat: 1.8, servingSize: "1 cup" },
-  { id: "3", name: "Avocado", calories: 160, protein: 2, carbs: 9, fat: 15, servingSize: "1/2 fruit" },
-  { id: "4", name: "Greek Yogurt (Plain)", calories: 100, protein: 17, carbs: 6, fat: 0.7, servingSize: "170g" },
-  { id: "5", name: "Salmon Fillet", calories: 208, protein: 20, carbs: 0, fat: 13, servingSize: "100g" },
-  { id: "6", name: "Broccoli (Steamed)", calories: 55, protein: 3.7, carbs: 11, fat: 0.6, servingSize: "1 cup" },
-];
-
 interface FoodSearchProps {
   onAddFood?: (food: FoodItem) => void;
 }
@@ -34,18 +24,29 @@ export function FoodSearch({ onAddFood }: FoodSearchProps) {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<FoodItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!query.trim()) return;
     setIsSearching(true);
-    // todo: remove mock functionality - simulate API call
-    setTimeout(() => {
-      const filtered = mockFoods.filter((f) =>
-        f.name.toLowerCase().includes(query.toLowerCase())
-      );
-      setResults(filtered.length > 0 ? filtered : mockFoods.slice(0, 3));
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/food/search?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error("Failed to search");
+      }
+      const data = await response.json();
+      setResults(data.results.map((item: any) => ({
+        ...item,
+        id: String(item.id),
+      })));
+    } catch (err) {
+      setError("Failed to search. Please try again.");
+      setResults([]);
+    } finally {
       setIsSearching(false);
-    }, 500);
+    }
   };
 
   const handleAdd = (food: FoodItem) => {
@@ -75,6 +76,10 @@ export function FoodSearch({ onAddFood }: FoodSearchProps) {
             {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
           </Button>
         </div>
+
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
 
         {results.length > 0 && (
           <ScrollArea className="h-[300px]">
