@@ -112,7 +112,7 @@ export function ResearchHub() {
             {researchCategories.map((cat) => (
               <TabsTrigger key={cat.id} value={cat.id} className="gap-1 text-xs" data-testid={`tab-${cat.id}`}>
                 <cat.icon className="h-3 w-3" />
-                <span className="hidden sm:inline">{cat.label}</span>
+                <span>{cat.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
