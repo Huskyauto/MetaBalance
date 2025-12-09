@@ -6,9 +6,10 @@ MetaBalance is a comprehensive health tracking application that helps users mana
 
 ## Current State
 
-**Status**: Fully functional application with database persistence and AI integration
+**Status**: Fully functional application with database persistence, AI integration, and Replit Auth
 
 ### Completed Features
+- **Replit Auth** - Full OIDC authentication with login/logout
 - Dashboard with health metrics overview (real data)
 - Daily wins tracking with streak counter
 - Nutrition progress visualization
@@ -18,9 +19,24 @@ MetaBalance is a comprehensive health tracking application that helps users mana
 - AI coach chat interface (OpenAI integration)
 - Research hub with health articles
 - Dark/light theme toggle (light mode default)
-- Responsive navigation
+- Responsive navigation with user profile dropdown
 - Settings page for user profile and goals
 - PostgreSQL database with Drizzle ORM
+
+## Authentication
+
+The app uses Replit Auth (OIDC) for authentication:
+
+- **Landing Page** (`/`) - Shown to unauthenticated users with "Sign In" and "Get Started" buttons
+- **Login Flow** - `/api/login` initiates OIDC auth, `/api/callback` handles the redirect
+- **Logout** - `/api/logout` ends session and redirects to landing
+- **Protected Routes** - All API routes use `isAuthenticated` middleware
+- **User Session** - Stored in PostgreSQL `sessions` table with automatic token refresh
+
+**Key Auth Files:**
+- `server/replitAuth.ts` - OIDC middleware setup
+- `client/src/hooks/useAuth.ts` - React hook for auth state
+- `client/src/pages/Landing.tsx` - Public landing page
 
 ## Tech Stack
 
