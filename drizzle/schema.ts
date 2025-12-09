@@ -366,3 +366,55 @@ export const weeklyReflections = mysqlTable("weekly_reflections", {
 
 export type WeeklyReflection = typeof weeklyReflections.$inferSelect;
 export type InsertWeeklyReflection = typeof weeklyReflections.$inferInsert;
+
+/**
+ * Water intake tracking - logs daily water consumption
+ */
+export const waterIntake = mysqlTable("water_intake", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  date: timestamp("date").notNull(), // Date for this water log
+  glassesConsumed: int("glassesConsumed").default(0).notNull(), // Number of 8oz glasses
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("water_intake_userId_idx").on(table.userId),
+  dateIdx: index("water_intake_date_idx").on(table.date),
+  userDateIdx: index("water_intake_user_date_idx").on(table.userId, table.date),
+}));
+
+export type WaterIntake = typeof waterIntake.$inferSelect;
+export type InsertWaterIntake = typeof waterIntake.$inferInsert;
+
+/**
+ * Favorite foods - stores user's frequently logged foods for quick access
+ */
+export const favoriteFoods = mysqlTable("favorite_foods", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Food details (copied from meal log)
+  foodName: varchar("foodName", { length: 255 }).notNull(),
+  servingSize: varchar("servingSize", { length: 100 }),
+  
+  // Nutrition info
+  calories: int("calories"),
+  protein: int("protein"),
+  carbs: int("carbs"),
+  fats: int("fats"),
+  fiber: int("fiber"),
+  
+  // Usage tracking
+  timesUsed: int("timesUsed").default(0).notNull(),
+  lastUsed: timestamp("lastUsed"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("favorite_foods_userId_idx").on(table.userId),
+  lastUsedIdx: index("favorite_foods_lastUsed_idx").on(table.lastUsed),
+}));
+
+export type FavoriteFood = typeof favoriteFoods.$inferSelect;
+export type InsertFavoriteFood = typeof favoriteFoods.$inferInsert;

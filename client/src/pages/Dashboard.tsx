@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DailyWins } from "@/components/DailyWins";
 import { ProgressCharts } from "@/components/ProgressCharts";
 import { StreakTracker } from "@/components/StreakTracker";
+import { WaterTracker } from "@/components/WaterTracker";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -73,9 +74,14 @@ export default function Dashboard() {
           <StreakTracker />
         </div>
 
-        {/* Progress Charts */}
-        <div className="mb-8">
-          <ProgressCharts />
+        {/* Progress Charts & Water Tracker */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <ProgressCharts />
+          </div>
+          <div>
+            <WaterTracker />
+          </div>
         </div>
 
         {/* Daily Insight */}

@@ -13,7 +13,8 @@ import {
   chatMessages, InsertChatMessage,
   researchContent, InsertResearchContent,
   dailyGoals, InsertDailyGoal,
-  weeklyReflections, InsertWeeklyReflection
+  weeklyReflections, InsertWeeklyReflection,
+  waterIntake, InsertWaterIntake
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -700,6 +701,83 @@ export async function getRecentReflections(userId: number, limit: number = 10) {
     return result;
   } catch (error) {
     console.error("[Database] Failed to get recent reflections:", error);
+    return [];
+  }
+}
+
+
+// ===== WATER INTAKE FUNCTIONS =====
+
+export async function upsertWaterIntake(userId: number, date: Date, glassesConsumed: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const existing = await db.select()
+      .from(waterIntake)
+      .where(and(
+        eq(waterIntake.userId, userId),
+        eq(waterIntake.date, startOfDay)
+      ))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db.update(waterIntake)
+        .set({ glassesConsumed, updatedAt: new Date() })
+        .where(eq(waterIntake.id, existing[0].id));
+    } else {
+      await db.insert(waterIntake).values({
+        userId,
+        date: startOfDay,
+        glassesConsumed,
+      });
+    }
+  } catch (error) {
+    console.error("[Database] Failed to upsert water intake:", error);
+  }
+}
+
+export async function getWaterIntake(userId: number, date: Date) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const result = await db.select()
+      .from(waterIntake)
+      .where(and(
+        eq(waterIntake.userId, userId),
+        eq(waterIntake.date, startOfDay)
+      ))
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get water intake:", error);
+    return null;
+  }
+}
+
+export async function getWeeklyWaterIntake(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    return await db.select()
+      .from(waterIntake)
+      .where(and(
+        eq(waterIntake.userId, userId),
+        gte(waterIntake.date, startDate),
+        lte(waterIntake.date, endDate)
+      ))
+      .orderBy(desc(waterIntake.date));
+  } catch (error) {
+    console.error("[Database] Failed to get weekly water intake:", error);
     return [];
   }
 }

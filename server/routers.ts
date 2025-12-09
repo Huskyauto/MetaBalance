@@ -789,6 +789,37 @@ Be supportive, motivational, and practical in your responses.`;
         return await db.getRecentReflections(ctx.user.id, input.limit);
       }),
   }),
+
+  water: router({
+    upsert: protectedProcedure
+      .input(z.object({
+        date: z.date(),
+        glassesConsumed: z.number().min(0).max(20),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.upsertWaterIntake(ctx.user.id, input.date, input.glassesConsumed);
+        
+        // Update daily goal if 8+ glasses
+        if (input.glassesConsumed >= 8) {
+          await db.upsertDailyGoal(ctx.user.id, input.date, { waterGoalComplete: true });
+        }
+        
+        return { success: true };
+      }),
+    
+    getToday: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getWaterIntake(ctx.user.id, new Date());
+    }),
+    
+    getWeekly: protectedProcedure
+      .input(z.object({
+        startDate: z.date(),
+        endDate: z.date(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getWeeklyWaterIntake(ctx.user.id, input.startDate, input.endDate);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
