@@ -14,12 +14,15 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { data: profile, isLoading: profileLoading } = trpc.profile.get.useQuery(undefined, {
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
   });
-  const { data: latestProgress } = trpc.progress.latest.useQuery();
-  const { data: todayInsight } = trpc.insights.getToday.useQuery();
+  const { data: latestProgress } = trpc.progress.latest.useQuery(undefined, {
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+  });
+  const { data: todayInsight } = trpc.insights.getToday.useQuery(undefined, {
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+  });
 
   if (!user) {
     setLocation("/");

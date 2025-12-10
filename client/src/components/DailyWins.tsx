@@ -1,15 +1,27 @@
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Star, CheckCircle2, Circle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import confetti from "canvas-confetti";
 
 export function DailyWins() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Create a fresh date for today, recalculated when component mounts or day changes
+  const today = useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }, []);
+  
   const [celebrationShown, setCelebrationShown] = useState(false);
 
-  const { data: dailyGoal, refetch } = trpc.dailyGoals.get.useQuery({ date: today });
+  const { data: dailyGoal, refetch } = trpc.dailyGoals.get.useQuery(
+    { date: today },
+    {
+      refetchOnMount: 'always',
+      refetchOnWindowFocus: true,
+      staleTime: 0,
+    }
+  );
   const toggleGoal = trpc.dailyGoals.toggleGoal.useMutation({
     onSuccess: () => refetch(),
   });

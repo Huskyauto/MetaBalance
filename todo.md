@@ -712,3 +712,9 @@
 - [ ] Screen reader improvements (WCAG 2.1 AA)
 - [ ] Keyboard navigation enhancements
 - [ ] High contrast mode option
+
+
+## Bug Fixes (Dec 9, 2025)
+- [x] Daily Wins showing yesterday's completed goals instead of resetting for new day
+- [x] App takes long time to load on initial visit
+- [x] Date comparison logic needs timezone-aware handling

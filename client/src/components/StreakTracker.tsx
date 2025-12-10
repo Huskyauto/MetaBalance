@@ -12,9 +12,14 @@ export function StreakTracker() {
     return date;
   }, []);
 
-  const { data: weeklyGoals } = trpc.dailyGoals.getWeek.useQuery({
-    weekStartDate: ninetyDaysAgo,
-  });
+  const { data: weeklyGoals } = trpc.dailyGoals.getWeek.useQuery(
+    {
+      weekStartDate: ninetyDaysAgo,
+    },
+    {
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    }
+  );
 
   // Calculate current streak (consecutive days with 3+ stars)
   const streakData = useMemo(() => {

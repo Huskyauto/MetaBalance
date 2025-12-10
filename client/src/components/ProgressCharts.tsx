@@ -29,13 +29,20 @@ export function ProgressCharts() {
   }, [timeRange]);
 
   // Fetch progress logs
-  const { data: progressLogs } = trpc.progress.list.useQuery({
-    startDate,
-    endDate,
-  });
+  const { data: progressLogs } = trpc.progress.list.useQuery(
+    {
+      startDate,
+      endDate,
+    },
+    {
+      staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    }
+  );
 
   // Fetch user profile for target weight
-  const { data: profile } = trpc.profile.get.useQuery();
+  const { data: profile } = trpc.profile.get.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
   // Prepare chart data
   const chartData = useMemo(() => {
