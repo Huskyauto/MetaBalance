@@ -5,14 +5,36 @@ import { useEffect, useState, useMemo } from "react";
 import confetti from "canvas-confetti";
 
 export function DailyWins() {
-  // Create a fresh date for today, recalculated when component mounts or day changes
+  // Use current date string as a key to force refresh when day changes
+  const [dateKey, setDateKey] = useState(() => new Date().toDateString());
+  
+  // Create today's date based on the current dateKey
   const today = useMemo(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
     return date;
-  }, []);
+  }, [dateKey]);
   
   const [celebrationShown, setCelebrationShown] = useState(false);
+  
+  // Check if date has changed and update dateKey
+  useEffect(() => {
+    const checkDate = () => {
+      const currentDateString = new Date().toDateString();
+      if (currentDateString !== dateKey) {
+        setDateKey(currentDateString);
+        setCelebrationShown(false);
+      }
+    };
+    
+    // Check immediately on mount
+    checkDate();
+    
+    // Check every minute
+    const interval = setInterval(checkDate, 60000);
+    
+    return () => clearInterval(interval);
+  }, [dateKey]);
 
   const { data: dailyGoal, refetch } = trpc.dailyGoals.get.useQuery(
     { date: today },

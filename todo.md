@@ -721,3 +721,11 @@
 - [x] Daily Wins showing yesterday's completed goals instead of resetting for new day
 - [x] App takes long time to load on initial visit
 - [x] Date comparison logic needs timezone-aware handling
+
+
+## Bug Fixes (Dec 9, 2025 - Part 2)
+- [x] Daily Wins still showing yesterday's completed goals after midnight
+- [x] Need to implement proper date-based refresh mechanism
+- [x] useMemo with empty deps doesn't update when day changes
+- [x] Implemented dateKey state with interval checking (every minute)
+- [x] Component now properly refreshes when day changes
