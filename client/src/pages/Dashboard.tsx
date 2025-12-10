@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar } from "lucide-react";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar, Trophy } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyWins } from "@/components/DailyWins";
@@ -226,6 +226,22 @@ export default function Dashboard() {
                   <div>
                     <CardTitle>AI Coach</CardTitle>
                     <CardDescription>Get personalized advice</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/achievements">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 border-yellow-200 dark:border-yellow-800">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                    <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div>
+                    <CardTitle>Achievements</CardTitle>
+                    <CardDescription>View your badges & milestones</CardDescription>
                   </div>
                 </div>
               </CardHeader>

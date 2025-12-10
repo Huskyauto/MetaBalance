@@ -418,3 +418,27 @@ export const favoriteFoods = mysqlTable("favorite_foods", {
 
 export type FavoriteFood = typeof favoriteFoods.$inferSelect;
 export type InsertFavoriteFood = typeof favoriteFoods.$inferInsert;
+
+/**
+ * User achievements - tracks earned badges and milestones
+ */
+export const achievements = mysqlTable("achievements", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Achievement identifier
+  achievementId: varchar("achievementId", { length: 100 }).notNull(), // e.g., "first_week", "weight_10lbs", "streak_100"
+  
+  // Unlock details
+  unlockedAt: timestamp("unlockedAt").notNull(),
+  viewed: boolean("viewed").default(false).notNull(), // Whether user has seen the unlock notification
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("achievements_userId_idx").on(table.userId),
+  achievementIdIdx: index("achievements_achievementId_idx").on(table.achievementId),
+  userAchievementIdx: index("achievements_user_achievement_idx").on(table.userId, table.achievementId),
+}));
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = typeof achievements.$inferInsert;

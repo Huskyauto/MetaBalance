@@ -8,6 +8,7 @@ import * as db from "./db";
 import { calculateNutritionGoals } from "./nutritionGoals";
 import { autocompleteIngredients, getIngredientNutrition } from "./spoonacular";
 import { ensureProfileInitialized, getOwnerProfileDefaults } from "./profileInit";
+import { ACHIEVEMENT_DEFINITIONS, checkUnlockedAchievements } from "./achievements";
 
 export const appRouter = router({
   system: systemRouter,
@@ -819,6 +820,57 @@ Be supportive, motivational, and practical in your responses.`;
       .query(async ({ ctx, input }) => {
         return await db.getWeeklyWaterIntake(ctx.user.id, input.startDate, input.endDate);
       }),
+  }),
+
+  achievements: router({
+    // Get all achievements (locked and unlocked)
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      const userAchievements = await db.getUserAchievements(ctx.user.id);
+      const unlockedIds = userAchievements.map(a => a.achievementId);
+      
+      return Object.values(ACHIEVEMENT_DEFINITIONS).map(def => ({
+        ...def,
+        unlocked: unlockedIds.includes(def.id),
+        unlockedAt: userAchievements.find(a => a.achievementId === def.id)?.unlockedAt || null,
+      }));
+    }),
+    
+    // Get unviewed achievements (for notifications)
+    getUnviewed: protectedProcedure.query(async ({ ctx }) => {
+      const unviewed = await db.getUnviewedAchievements(ctx.user.id);
+      return unviewed.map(a => ({
+        ...a,
+        definition: ACHIEVEMENT_DEFINITIONS[a.achievementId],
+      }));
+    }),
+    
+    // Mark achievements as viewed
+    markViewed: protectedProcedure
+      .input(z.object({ achievementIds: z.array(z.string()) }))
+      .mutation(async ({ ctx, input }) => {
+        await db.markAchievementsViewed(ctx.user.id, input.achievementIds);
+        return { success: true };
+      }),
+    
+    // Check for newly unlocked achievements
+    checkUnlocks: protectedProcedure.mutation(async ({ ctx }) => {
+      const stats = await db.getUserStats(ctx.user.id);
+      if (!stats) return { newAchievements: [] };
+      
+      const existingAchievements = await db.getUserAchievements(ctx.user.id);
+      const existingIds = existingAchievements.map(a => a.achievementId);
+      
+      const newlyUnlocked = checkUnlockedAchievements(stats, existingIds);
+      
+      // Unlock new achievements
+      for (const achievementId of newlyUnlocked) {
+        await db.unlockAchievement(ctx.user.id, achievementId);
+      }
+      
+      return {
+        newAchievements: newlyUnlocked.map(id => ACHIEVEMENT_DEFINITIONS[id]),
+      };
+    }),
   }),
 });
 

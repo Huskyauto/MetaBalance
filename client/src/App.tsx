@@ -18,7 +18,9 @@ import NutritionAnalytics from "./pages/NutritionAnalytics";
 import WeightLossResearch from "./pages/WeightLossResearch";
 import WeeklyReflection from "./pages/WeeklyReflection";
 import Settings from "./pages/Settings";
+import Achievements from "./pages/Achievements";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import { AchievementUnlockNotification } from "./components/AchievementUnlockNotification";
 
 function Router() {
   return (
@@ -37,6 +39,7 @@ function Router() {
       <Route path={"/research"} component={WeightLossResearch} />
       <Route path={"/reflection"} component={WeeklyReflection} />
       <Route path={"/settings"} component={Settings} />
+      <Route path={"/achievements"} component={Achievements} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -58,6 +61,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <AchievementUnlockNotification />
           <PWAInstallPrompt />
         </TooltipProvider>
       </ThemeProvider>

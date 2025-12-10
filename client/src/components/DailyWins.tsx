@@ -22,8 +22,14 @@ export function DailyWins() {
       staleTime: 0,
     }
   );
+  const checkAchievements = trpc.achievements.checkUnlocks.useMutation();
+  
   const toggleGoal = trpc.dailyGoals.toggleGoal.useMutation({
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      refetch();
+      // Check for newly unlocked achievements
+      checkAchievements.mutate();
+    },
   });
 
   const goals = [

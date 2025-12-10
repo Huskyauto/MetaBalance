@@ -103,12 +103,16 @@ export default function Meals() {
   );
 
   // Mutations
+  const checkAchievements = trpc.achievements.checkUnlocks.useMutation();
+  
   const createMeal = trpc.meals.create.useMutation({
     onSuccess: () => {
       utils.meals.getByDate.invalidate();
       utils.meals.getDailyTotals.invalidate();
       setIsAddDialogOpen(false);
       resetForm();
+      // Check for newly unlocked achievements (e.g., first meal logged)
+      checkAchievements.mutate();
       toast.success("Meal added successfully!");
     },
     onError: (error) => {

@@ -1,4 +1,4 @@
-import { eq, and, desc, gte, lte } from "drizzle-orm";
+import { eq, and, desc, gte, lte, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users,
@@ -14,7 +14,8 @@ import {
   researchContent, InsertResearchContent,
   dailyGoals, InsertDailyGoal,
   weeklyReflections, InsertWeeklyReflection,
-  waterIntake, InsertWaterIntake
+  waterIntake, InsertWaterIntake,
+  achievements, InsertAchievement
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -779,5 +780,197 @@ export async function getWeeklyWaterIntake(userId: number, startDate: Date, endD
   } catch (error) {
     console.error("[Database] Failed to get weekly water intake:", error);
     return [];
+  }
+}
+
+
+// ===== ACHIEVEMENT FUNCTIONS =====
+
+export async function unlockAchievement(userId: number, achievementId: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    // Check if already unlocked
+    const existing = await db.select()
+      .from(achievements)
+      .where(and(
+        eq(achievements.userId, userId),
+        eq(achievements.achievementId, achievementId)
+      ))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return existing[0]; // Already unlocked
+    }
+
+    // Unlock the achievement
+    await db.insert(achievements).values({
+      userId,
+      achievementId,
+      unlockedAt: new Date(),
+      viewed: false,
+    });
+
+    // Fetch the newly created achievement
+    const newAchievement = await db.select()
+      .from(achievements)
+      .where(and(
+        eq(achievements.userId, userId),
+        eq(achievements.achievementId, achievementId)
+      ))
+      .limit(1);
+
+    return newAchievement[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to unlock achievement:", error);
+    return null;
+  }
+}
+
+export async function getUserAchievements(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    return await db.select()
+      .from(achievements)
+      .where(eq(achievements.userId, userId))
+      .orderBy(desc(achievements.unlockedAt));
+  } catch (error) {
+    console.error("[Database] Failed to get user achievements:", error);
+    return [];
+  }
+}
+
+export async function getUnviewedAchievements(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    return await db.select()
+      .from(achievements)
+      .where(and(
+        eq(achievements.userId, userId),
+        eq(achievements.viewed, false)
+      ))
+      .orderBy(desc(achievements.unlockedAt));
+  } catch (error) {
+    console.error("[Database] Failed to get unviewed achievements:", error);
+    return [];
+  }
+}
+
+export async function markAchievementsViewed(userId: number, achievementIds: string[]) {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    if (achievementIds.length === 0) return;
+    
+    await db.update(achievements)
+      .set({ viewed: true })
+      .where(and(
+        eq(achievements.userId, userId),
+        inArray(achievements.achievementId, achievementIds)
+      ));
+  } catch (error) {
+    console.error("[Database] Failed to mark achievements viewed:", error);
+  }
+}
+
+export async function getUserStats(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    // Get profile for starting weight
+    const profile = await getMetabolicProfile(userId);
+    if (!profile) return null;
+
+    // Get latest weight
+    const latestProgress = await getLatestProgressLog(userId);
+    const currentWeight = latestProgress?.weight || profile.currentWeight || 0;
+    const startingWeight = profile.currentWeight || 0;
+
+    // Get all daily goals for stats
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    
+    const dailyGoalsData = await db.select()
+      .from(dailyGoals)
+      .where(and(
+        eq(dailyGoals.userId, userId),
+        gte(dailyGoals.date, ninetyDaysAgo)
+      ))
+      .orderBy(desc(dailyGoals.date));
+
+    // Calculate streaks
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let consecutivePerfectDays = 0;
+    let totalPerfectDays = 0;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < dailyGoalsData.length; i++) {
+      const goal = dailyGoalsData[i];
+      const goalDate = new Date(goal.date);
+      goalDate.setHours(0, 0, 0, 0);
+      
+      const daysDiff = Math.floor((today.getTime() - goalDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Current streak calculation
+      if (daysDiff === currentStreak && (goal.winScore || 0) >= 3) {
+        currentStreak++;
+      } else if (daysDiff === currentStreak) {
+        break; // Streak ended
+      }
+
+      // Longest streak
+      if ((goal.winScore || 0) >= 3) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 0;
+      }
+
+      // Perfect days
+      if ((goal.winScore || 0) === 5) {
+        totalPerfectDays++;
+        if (daysDiff === consecutivePerfectDays) {
+          consecutivePerfectDays++;
+        }
+      }
+    }
+
+    // Get total meals logged
+    const mealCount = await db.select({ count: sql<number>`count(*)` })
+      .from(mealLogs)
+      .where(eq(mealLogs.userId, userId));
+    
+    const totalMealsLogged = Number(mealCount[0]?.count || 0);
+
+    // Days tracking
+    const firstGoal = dailyGoalsData[dailyGoalsData.length - 1];
+    const daysTracking = firstGoal 
+      ? Math.floor((today.getTime() - new Date(firstGoal.date).getTime()) / (1000 * 60 * 60 * 24)) + 1
+      : 0;
+
+    return {
+      currentWeight,
+      startingWeight,
+      currentStreak,
+      longestStreak,
+      totalMealsLogged,
+      totalPerfectDays,
+      consecutivePerfectDays,
+      daysTracking,
+    };
+  } catch (error) {
+    console.error("[Database] Failed to get user stats:", error);
+    return null;
   }
 }

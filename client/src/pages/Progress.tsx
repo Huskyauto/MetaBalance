@@ -25,6 +25,8 @@ export default function Progress() {
   const { data: progressEntries, isLoading } = trpc.progress.list.useQuery({});
   const { data: profile } = trpc.profile.get.useQuery();
 
+  const checkAchievements = trpc.achievements.checkUnlocks.useMutation();
+  
   const createProgress = trpc.progress.create.useMutation({
     onSuccess: () => {
       toast.success("Progress logged successfully!");
@@ -32,6 +34,8 @@ export default function Progress() {
       utils.progress.latest.invalidate();
       setIsDialogOpen(false);
       resetForm();
+      // Check for weight loss achievements
+      checkAchievements.mutate();
     },
     onError: (error) => {
       toast.error("Failed to log progress: " + error.message);
