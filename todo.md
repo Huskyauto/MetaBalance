@@ -729,3 +729,7 @@
 - [x] useMemo with empty deps doesn't update when day changes
 - [x] Implemented dateKey state with interval checking (every minute)
 - [x] Component now properly refreshes when day changes
+- [x] Backend getDailyGoal returning yesterday's data for today's date
+- [x] Date range query in database needs timezone-aware comparison
+- [x] Changed to use DATE() SQL function for exact date-only matching
+- [x] Format input date as YYYY-MM-DD string for comparison
