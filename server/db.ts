@@ -593,8 +593,12 @@ export async function getDailyGoal(userId: number, date: Date) {
   if (!db) return null;
 
   try {
-    // Format date as YYYY-MM-DD for exact date matching
-    const dateStr = date.toISOString().split('T')[0];
+    // Create start and end of day boundaries in UTC
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
     const result = await db
       .select()
@@ -602,7 +606,8 @@ export async function getDailyGoal(userId: number, date: Date) {
       .where(
         and(
           eq(dailyGoals.userId, userId),
-          sql`DATE(${dailyGoals.date}) = ${dateStr}`
+          gte(dailyGoals.date, startOfDay),
+          lte(dailyGoals.date, endOfDay)
         )
       )
       .limit(1);

@@ -733,3 +733,7 @@
 - [x] Date range query in database needs timezone-aware comparison
 - [x] Changed to use DATE() SQL function for exact date-only matching
 - [x] Format input date as YYYY-MM-DD string for comparison
+- [x] SQL DATE() function still returning wrong records - need to debug query
+- [x] Check actual database records to verify date storage format
+- [x] Fixed by using setUTCHours() instead of setHours() for timezone consistency
+- [x] Verified fix working - shows 0/5 goals for new day
