@@ -442,3 +442,143 @@ export const achievements = mysqlTable("achievements", {
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;
+
+/**
+ * Journey Phases - tracks user's progress through the 90lb Journey 4-phase program
+ */
+export const journeyPhases = mysqlTable("journey_phases", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  phaseNumber: int("phaseNumber").notNull(), // 1-4
+  phaseName: varchar("phaseName", { length: 255 }).notNull(),
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate"),
+  
+  goalWeightLoss: decimal("goalWeightLoss", { precision: 5, scale: 2 }).notNull(), // lbs
+  actualWeightLoss: decimal("actualWeightLoss", { precision: 5, scale: 2 }).default("0"),
+  
+  status: mysqlEnum("status", ["active", "completed", "skipped"]).notNull().default("active"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("journey_phases_userId_idx").on(table.userId),
+  phaseNumberIdx: index("journey_phases_phaseNumber_idx").on(table.phaseNumber),
+  userPhaseIdx: index("journey_phases_user_phase_idx").on(table.userId, table.phaseNumber),
+}));
+
+export type JourneyPhase = typeof journeyPhases.$inferSelect;
+export type InsertJourneyPhase = typeof journeyPhases.$inferInsert;
+
+/**
+ * Journey Supplements - master list of supplements recommended in the 90lb Journey
+ */
+export const journeySupplements = mysqlTable("journey_supplements", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  name: varchar("name", { length: 255 }).notNull(),
+  dosage: varchar("dosage", { length: 100 }).notNull(),
+  frequency: varchar("frequency", { length: 100 }).notNull(), // daily, weekly, as-needed
+  monthlyCost: decimal("monthlyCost", { precision: 6, scale: 2 }),
+  category: mysqlEnum("category", ["foundation", "advanced", "optional"]).notNull(),
+  phaseIntroduced: int("phaseIntroduced").notNull(), // 1-4
+  benefits: text("benefits"),
+  brands: varchar("brands", { length: 500 }),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type JourneySupplement = typeof journeySupplements.$inferSelect;
+export type InsertJourneySupplement = typeof journeySupplements.$inferInsert;
+
+/**
+ * User Supplement Log - tracks daily supplement intake for journey supplements
+ */
+export const userSupplementLog = mysqlTable("user_supplement_log", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  supplementId: int("supplementId").notNull().references(() => journeySupplements.id, { onDelete: "cascade" }),
+  
+  date: timestamp("date").notNull(),
+  taken: boolean("taken").notNull().default(false),
+  notes: text("notes"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_supplement_log_userId_idx").on(table.userId),
+  dateIdx: index("user_supplement_log_date_idx").on(table.date),
+  userDateIdx: index("user_supplement_log_user_date_idx").on(table.userId, table.date),
+}));
+
+export type UserSupplementLog = typeof userSupplementLog.$inferSelect;
+export type InsertUserSupplementLog = typeof userSupplementLog.$inferInsert;
+
+/**
+ * Extended Fasting Sessions - tracks water-only fasting protocols (24hr, 3-5 day, 7-10 day)
+ */
+export const extendedFastingSessions = mysqlTable("extended_fasting_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  startTime: timestamp("startTime").notNull(),
+  endTime: timestamp("endTime"),
+  
+  type: mysqlEnum("type", ["24hr", "3-5day", "7-10day"]).notNull(),
+  targetDuration: int("targetDuration").notNull(), // hours
+  actualDuration: int("actualDuration"), // hours
+  
+  // Electrolyte tracking (JSON string with daily log)
+  electrolytesLog: text("electrolytesLog"),
+  
+  // Weight tracking
+  weightBefore: decimal("weightBefore", { precision: 5, scale: 2 }),
+  weightAfter: decimal("weightAfter", { precision: 5, scale: 2 }),
+  
+  notes: text("notes"),
+  completed: boolean("completed").notNull().default(false),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("extended_fasting_sessions_userId_idx").on(table.userId),
+  startTimeIdx: index("extended_fasting_sessions_startTime_idx").on(table.startTime),
+}));
+
+export type ExtendedFastingSession = typeof extendedFastingSessions.$inferSelect;
+export type InsertExtendedFastingSession = typeof extendedFastingSessions.$inferInsert;
+
+/**
+ * Blood Work Results - tracks metabolic health markers over time
+ */
+export const bloodWorkResults = mysqlTable("blood_work_results", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  testDate: timestamp("testDate").notNull(),
+  
+  // Glucose & diabetes markers
+  glucose: decimal("glucose", { precision: 5, scale: 2 }), // mg/dL
+  a1c: decimal("a1c", { precision: 4, scale: 2 }), // %
+  
+  // Lipid panel
+  totalCholesterol: decimal("totalCholesterol", { precision: 5, scale: 2 }), // mg/dL
+  ldl: decimal("ldl", { precision: 5, scale: 2 }), // mg/dL
+  hdl: decimal("hdl", { precision: 5, scale: 2 }), // mg/dL
+  triglycerides: decimal("triglycerides", { precision: 6, scale: 2 }), // mg/dL
+  
+  // Thyroid
+  tsh: decimal("tsh", { precision: 5, scale: 3 }), // mIU/L
+  
+  // Liver function
+  alt: decimal("alt", { precision: 5, scale: 2 }), // U/L
+  ast: decimal("ast", { precision: 5, scale: 2 }), // U/L
+  
+  notes: text("notes"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("blood_work_results_userId_idx").on(table.userId),
+  testDateIdx: index("blood_work_results_testDate_idx").on(table.testDate),
+}));
+
+export type BloodWorkResult = typeof bloodWorkResults.$inferSelect;
+export type InsertBloodWorkResult = typeof bloodWorkResults.$inferInsert;

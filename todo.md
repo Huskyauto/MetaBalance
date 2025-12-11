@@ -737,3 +737,77 @@
 - [x] Check actual database records to verify date storage format
 - [x] Fixed by using setUTCHours() instead of setHours() for timezone consistency
 - [x] Verified fix working - shows 0/5 goals for new day
+
+
+## 90lb Journey Integration (Dec 9, 2025)
+---
+
+### Phase-Based Journey Tracker
+- [x] Add journey_phases table (phase_number, phase_name, start_date, end_date, goal_weight_loss, actual_weight_loss, status)
+- [x] Create journey progress calculator based on time elapsed and weight lost
+- [ ] Add phase transition logic (auto-advance when time/weight milestones met)
+- [ ] Create Journey Dashboard page showing current phase, progress, and next milestones
+- [ ] Add phase-specific guidance and tips for current phase
+- [ ] Show phase timeline visualization (4 phases over 12 months)
+
+### Supplement Tracker
+- [x] Add journey_supplements table (name, dosage, frequency, cost, category, phase_introduced)
+- [x] Add user_supplement_log table (user_id, supplement_id, date, taken)
+- [x] Seed database with 16 foundation/advanced/optional supplements
+- [ ] Create Supplements page with list of recommended supplements by phase
+- [ ] Add daily supplement checklist with reminders
+- [ ] Track monthly supplement costs
+- [ ] Show supplement introduction timeline based on journey phase
+
+### Fasting Protocol Tracker
+- [x] Add extended_fasting_sessions table (user_id, start_time, end_time, type, target_duration, actual_duration, electrolytes_taken)
+- [x] Create backend functions for starting/ending fasting sessions
+- [ ] Create Fasting page with protocol options (24hr, 3-5 day, 7-10 day)
+- [ ] Add fasting timer with elapsed time display
+- [ ] Implement electrolyte reminder notifications during fasting
+- [ ] Track fasting history and success rate
+- [ ] Add refeeding syndrome prevention warnings for extended fasts
+- [ ] Calculate weight loss from fasting sessions
+
+### BMR/TDEE Calculator
+- [ ] Implement Mifflin-St Jeor equation (gender-specific formulas)
+- [ ] Add activity level selector (sedentary, lightly active, moderately active, very active)
+- [ ] Calculate personalized daily calorie target (TDEE - 750 cal deficit)
+- [ ] Show macronutrient breakdown (30-35% protein, 40% carbs, 25-30% fat)
+- [ ] Add calculator to onboarding flow
+- [ ] Recalculate automatically when weight changes by 10-15 lbs
+
+### Educational Content & Guidance
+- [ ] Add phase descriptions and goals to Journey Dashboard
+- [ ] Create tips library organized by phase and topic
+- [ ] Add supplement education (benefits, dosage, brands, costs)
+- [ ] Include fasting safety guidelines and contraindications
+- [ ] Add research & innovation section (6 cutting-edge strategies)
+- [ ] Create FAQ section for common questions
+
+### Milestone Celebrations
+- [ ] Add journey-specific achievements (First 24hr Fast, Phase 1 Complete, 25 lbs Lost, etc.)
+- [ ] Create phase completion celebration with confetti
+- [ ] Add milestone badges to achievements page
+- [ ] Send congratulations notifications for phase transitions
+
+### Blood Work & Health Tracking
+- [x] Add blood_work_results table (date, glucose, lipids, thyroid, a1c, alt, ast, notes)
+- [x] Create backend functions for adding/retrieving blood work results
+- [ ] Create Health Markers page for tracking lab results
+- [ ] Add reminders for baseline blood work (Phase 1 start)
+- [ ] Add reminders for follow-up blood work (Phase 4 end)
+- [ ] Show trends in metabolic markers over time
+
+### Cost Tracking
+- [ ] Add monthly cost estimates by phase
+- [ ] Track actual supplement spending
+- [ ] Show total investment vs expected results
+- [ ] Add budget planning tools for upcoming phases
+
+### Integration with Existing Features
+- [ ] Link Daily Wins to journey phase goals
+- [ ] Update Progress Tracking to show phase-based targets
+- [ ] Integrate fasting tracker with Daily Wins (Complete Fast goal)
+- [ ] Add supplement tracking to Daily Wins checklist
+- [ ] Update PDF export to include journey phase progress and supplement log
