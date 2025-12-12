@@ -811,3 +811,49 @@
 - [ ] Integrate fasting tracker with Daily Wins (Complete Fast goal)
 - [ ] Add supplement tracking to Daily Wins checklist
 - [ ] Update PDF export to include journey phase progress and supplement log
+
+
+## 90lb Journey Integration (Dec 9, 2025)
+
+### Phase-Based Journey Tracker
+- [x] Add journey_phases table (phase_number, phase_name, start_date, end_date, goal_weight_loss, actual_weight_loss, status)
+- [x] Create journey progress calculator based on time elapsed and weight lost
+- [x] Create Journey Dashboard page showing current phase, progress, and next milestones
+- [x] Add phase-specific guidance and tips for current phase
+- [x] Show phase timeline visualization (4 phases over 12 months)
+- [ ] Add phase transition logic (auto-advance when time/weight milestones met)
+
+### Supplement Tracker
+- [x] Add journey_supplements table (name, dosage, frequency, cost, category, phase_introduced)
+- [x] Add user_supplement_log table (user_id, supplement_id, date, taken)
+- [x] Seed database with 16 foundation/advanced/optional supplements
+- [x] Create Supplements page with list of recommended supplements by phase
+- [x] Add daily supplement checklist with reminders
+- [x] Track monthly supplement costs
+- [x] Show supplement introduction timeline based on journey phase
+
+### Fasting Protocol Tracker
+- [x] Add extended_fasting_sessions table (user_id, start_time, end_time, type, target_duration, actual_duration, electrolytes_taken)
+- [x] Create backend functions for starting/ending fasting sessions
+- [x] Create Fasting page with protocol options (24hr, 3-5 day, 7-10 day)
+- [x] Add fasting timer with elapsed time display
+- [x] Implement electrolyte reminder notifications during fasting
+- [x] Track fasting history and success rate
+- [x] Add refeeding syndrome prevention warnings for extended fasts
+- [x] Calculate weight loss from fasting sessions
+
+### BMR/TDEE Calculator
+- [x] Create BMR calculator using Mifflin-St Jeor equation
+- [x] Add TDEE calculation with activity factor multiplier
+- [x] Create calculator component with input form
+- [x] Show personalized 750 cal/day deficit recommendation
+- [x] Save calculated values to user profile
+- [x] Integrated into App.tsx routes
+
+### Blood Work & Health Tracking
+- [x] Add blood_work_results table (date, glucose, lipids, thyroid, a1c, alt, ast, notes)
+- [x] Create backend functions for adding/retrieving blood work results
+- [ ] Create Health Markers page for tracking lab results
+- [ ] Add reminders for baseline blood work (Phase 1 start)
+- [ ] Add reminders for follow-up blood work (Phase 4 end)
+- [ ] Show trends in metabolic markers over time

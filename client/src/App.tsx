@@ -19,6 +19,10 @@ import WeightLossResearch from "./pages/WeightLossResearch";
 import WeeklyReflection from "./pages/WeeklyReflection";
 import Settings from "./pages/Settings";
 import Achievements from "./pages/Achievements";
+import { JourneyDashboard } from "./pages/JourneyDashboard";
+import { JourneySupplementTracker } from "./pages/JourneySupplementTracker";
+import { FastingProtocolTracker } from "./pages/FastingProtocolTracker";
+import { BMRCalculator } from "./components/BMRCalculator";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { AchievementUnlockNotification } from "./components/AchievementUnlockNotification";
 
@@ -40,6 +44,10 @@ function Router() {
       <Route path={"/reflection"} component={WeeklyReflection} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/achievements"} component={Achievements} />
+      <Route path={"/journey"} component={JourneyDashboard} />
+      <Route path={"/journey-supplements"} component={JourneySupplementTracker} />
+      <Route path={"/fasting-protocol"} component={FastingProtocolTracker} />
+      <Route path={"/bmr-calculator"} component={BMRCalculator} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
