@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { trpc } from '@/lib/trpc';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Phase {
   id: number;
@@ -34,6 +35,13 @@ export function JourneyDashboard() {
   const profileQuery = trpc.profile.get.useQuery();
   
   const initializeJourneyMutation = trpc.journey.initializePhases.useMutation({
+    onSuccess: () => {
+      getAllPhasesQuery.refetch();
+      getCurrentPhaseQuery.refetch();
+    },
+  });
+  
+  const resetJourneyMutation = trpc.journey.resetJourney.useMutation({
     onSuccess: () => {
       getAllPhasesQuery.refetch();
       getCurrentPhaseQuery.refetch();
@@ -151,8 +159,36 @@ export function JourneyDashboard() {
       {/* All Phases Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle>12-Month Journey Timeline</CardTitle>
-          <CardDescription>Track your progress through all 4 phases</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>12-Month Journey Timeline</CardTitle>
+              <CardDescription>Track your progress through all 4 phases</CardDescription>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950">
+                  Reset Journey
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset Your Journey?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all your journey data including phases, supplement logs, fasting sessions, and blood work results. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => resetJourneyMutation.mutate()}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {resetJourneyMutation.isPending ? 'Resetting...' : 'Reset Journey'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

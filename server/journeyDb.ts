@@ -457,3 +457,19 @@ export async function calculateFastingStats(userId: number) {
     averageFastDuration: Math.round(avgDuration),
   };
 }
+
+export async function resetJourney(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Delete all journey-related data for this user
+  await db.delete(journeyPhases).where(eq(journeyPhases.userId, userId));
+  await db.delete(userSupplementLog).where(eq(userSupplementLog.userId, userId));
+  await db.delete(extendedFastingSessions).where(eq(extendedFastingSessions.userId, userId));
+  await db.delete(bloodWorkResults).where(eq(bloodWorkResults.userId, userId));
+  await db.delete(journeyInitializations).where(eq(journeyInitializations.userId, userId));
+  await db.delete(supplementReminders).where(eq(supplementReminders.userId, userId));
+  await db.delete(fastingAnalytics).where(eq(fastingAnalytics.userId, userId));
+  
+  return { success: true };
+}

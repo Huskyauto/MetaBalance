@@ -895,3 +895,8 @@
 
 ## Bug Report (User - Dec 13, 2025)
 - [x] Fix "Start Your Journey" green button not working on Journey page
+
+## Feature Request (User - Dec 13, 2025)
+- [x] Add "Reset Journey" button to allow users to restart their 90lb Journey
+- [x] Create backend procedure to delete all journey phases and related data
+- [x] Add confirmation dialog before resetting

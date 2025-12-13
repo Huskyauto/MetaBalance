@@ -29,6 +29,11 @@ export const journeyRouter = router({
     .mutation(async ({ ctx, input }) => {
       return await journeyDb.updatePhaseProgress(ctx.user.id, input.phaseNumber, input.actualWeightLoss);
     }),
+  
+  resetJourney: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      return await journeyDb.resetJourney(ctx.user.id);
+    }),
 });
 
 export const journeySupplementsRouter = router({
