@@ -153,7 +153,9 @@ A structured, evidence-based 12-month program for sustainable weight loss.
 - Visual phase timeline (4 phases over 12 months)
 - Progress tracking (time elapsed, weight lost)
 - Phase-specific guidance and tips
-- "Start My Journey" initialization
+- "Start My Journey" initialization button
+- **"Reset Journey" button**: Restart journey with confirmation dialog (deletes all journey data)
+- **Back to Dashboard navigation**: Arrow button for easy return to main page
 
 #### 2. Supplement Tracker (`/journey/supplements`)
 **16 Evidence-Based Supplements:**
