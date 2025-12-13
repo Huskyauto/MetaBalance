@@ -892,3 +892,6 @@
 - [ ] Add fasting success rate (completed vs abandoned)
 - [ ] Create time-of-day heatmap for fasting sessions
 - [ ] Test analytics with sample fasting data
+
+## Bug Report (User - Dec 13, 2025)
+- [x] Fix "Start Your Journey" green button not working on Journey page

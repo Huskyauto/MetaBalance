@@ -31,6 +31,26 @@ export function JourneyDashboard() {
 
   const getAllPhasesQuery = trpc.journey.getAllPhases.useQuery();
   const getCurrentPhaseQuery = trpc.journey.getCurrentPhase.useQuery();
+  const profileQuery = trpc.profile.get.useQuery();
+  
+  const initializeJourneyMutation = trpc.journey.initializePhases.useMutation({
+    onSuccess: () => {
+      getAllPhasesQuery.refetch();
+      getCurrentPhaseQuery.refetch();
+    },
+  });
+
+  const handleStartJourney = async () => {
+    if (!profileQuery.data?.currentWeight || !profileQuery.data?.targetWeight) {
+      alert('Please set your current weight and target weight in your profile first.');
+      return;
+    }
+    
+    await initializeJourneyMutation.mutateAsync({
+      startWeight: profileQuery.data.currentWeight,
+      targetWeight: profileQuery.data.targetWeight,
+    });
+  };
 
   useEffect(() => {
     if (getAllPhasesQuery.data) {
@@ -57,7 +77,12 @@ export function JourneyDashboard() {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             The 90lb Journey is a 12-month, 4-phase program designed to safely and sustainably achieve significant weight loss through evidence-based protocols.
           </p>
-          <Button>Start My Journey</Button>
+          <Button 
+            onClick={handleStartJourney}
+            disabled={initializeJourneyMutation.isPending}
+          >
+            {initializeJourneyMutation.isPending ? 'Initializing...' : 'Start My Journey'}
+          </Button>
         </CardContent>
       </Card>
     );
