@@ -857,3 +857,38 @@
 - [ ] Add reminders for baseline blood work (Phase 1 start)
 - [ ] Add reminders for follow-up blood work (Phase 4 end)
 - [ ] Show trends in metabolic markers over time
+
+
+## Journey Auto-Initialization & Advanced Features (Dec 9, 2025)
+
+### Auto-Initialize Journey
+- [x] Create journey_initialization table (userId, startDate, initialWeight, goalWeight, phase, completedPhases)
+- [x] Add backend functions for journey initialization
+- [ ] Add onboarding flow to set user's starting phase and weight goals
+- [ ] Implement automatic phase progression logic (time-based and weight-loss-based)
+- [ ] Create journey setup UI component with weight input and phase selection
+- [ ] Add journey initialization check to dashboard (redirect to setup if not initialized)
+- [ ] Calculate phase completion percentage based on time and weight loss
+- [ ] Test complete onboarding workflow
+
+### Supplement Reminder Notifications
+- [x] Add supplement_reminders table (userId, supplementId, reminderTime, enabled, frequency)
+- [x] Add backend functions for reminder management
+- [ ] Create notification scheduling system for daily reminders
+- [ ] Implement push notification integration
+- [ ] Build reminder settings UI in Settings page
+- [ ] Add snooze functionality (remind in 1 hour, 2 hours, etc.)
+- [ ] Track reminder acknowledgment and supplement logging
+- [ ] Test reminder delivery and snooze functionality
+
+### Fasting Analytics Dashboard
+- [x] Add fasting_analytics table with stats tracking
+- [x] Add backend functions for analytics calculation
+- [ ] Create analytics page showing fasting statistics
+- [ ] Build fasting frequency chart (fasts per week/month)
+- [ ] Add average duration chart (24hr vs 3-5 day vs 7-10 day)
+- [ ] Show weight loss per fast correlation
+- [ ] Display longest streak and current streak
+- [ ] Add fasting success rate (completed vs abandoned)
+- [ ] Create time-of-day heatmap for fasting sessions
+- [ ] Test analytics with sample fasting data

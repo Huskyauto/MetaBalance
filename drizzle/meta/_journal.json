@@ -43,6 +43,13 @@
       "when": 1765451043449,
       "tag": "0005_many_taskmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1765594610991,
+      "tag": "0006_loving_tarantula",
+      "breakpoints": true
     }
   ]
 }

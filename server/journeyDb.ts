@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { journeyPhases, journeySupplements, userSupplementLog, extendedFastingSessions, bloodWorkResults } from "../drizzle/schema";
+import { journeyPhases, journeySupplements, userSupplementLog, extendedFastingSessions, bloodWorkResults, journeyInitializations, supplementReminders, fastingAnalytics } from "../drizzle/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 
 /**
@@ -296,4 +296,163 @@ export async function getLatestBloodWork(userId: number) {
     .limit(1);
   
   return results[0] || null;
+}
+
+
+/**
+ * Journey Initialization
+ */
+
+export async function initializeUserJourney(userId: number, initialWeight: number, goalWeight: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { journeyInitializations } = await import("../drizzle/schema");
+  
+  return await db.insert(journeyInitializations).values({
+    userId,
+    startDate: new Date(),
+    initialWeight: initialWeight.toString(),
+    goalWeight: goalWeight.toString(),
+    currentPhase: 1,
+    completedPhases: 0,
+  });
+}
+
+export async function getJourneyInitialization(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { journeyInitializations } = await import("../drizzle/schema");
+  
+  return await db.query.journeyInitializations.findFirst({
+    where: (init: any, { eq }: any) => eq(init.userId, userId),
+  });
+}
+
+export async function updateJourneyPhase(userId: number, newPhase: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { journeyInitializations } = await import("../drizzle/schema");
+  
+  return await db
+    .update(journeyInitializations)
+    .set({ currentPhase: newPhase })
+    .where(eq(journeyInitializations.userId, userId));
+}
+
+/**
+ * Supplement Reminders
+ */
+
+export async function createSupplementReminder(userId: number, supplementId: number, reminderTime: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return await db.insert(supplementReminders).values({
+    userId,
+    supplementId,
+    reminderTime,
+    enabled: true,
+    frequency: 'daily',
+  });
+}
+
+export async function getSupplementReminders(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.query.supplementReminders.findMany({
+    where: (reminder: any, { eq, and }: any) => and(
+      eq(reminder.userId, userId),
+      eq(reminder.enabled, true)
+    ),
+  });
+}
+
+export async function updateSupplementReminder(reminderId: number, reminderTime: string, enabled: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return await db
+    .update(supplementReminders)
+    .set({ reminderTime, enabled })
+    .where(eq(supplementReminders.id, reminderId));
+}
+
+/**
+ * Fasting Analytics
+ */
+
+export async function getOrCreateFastingAnalytics(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let analytics = await db.query.fastingAnalytics.findFirst({
+    where: (analytic: any, { eq }: any) => eq(analytic.userId, userId),
+  });
+
+  if (!analytics) {
+    await db.insert(fastingAnalytics).values({
+      userId,
+      totalFasts: 0,
+      completedFasts: 0,
+      abandonedFasts: 0,
+      longestStreak: 0,
+      currentStreak: 0,
+    });
+
+    analytics = await db.query.fastingAnalytics.findFirst({
+      where: (analytic: any, { eq }: any) => eq(analytic.userId, userId),
+    });
+  }
+
+  return analytics;
+}
+
+export async function updateFastingAnalytics(userId: number, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return await db
+    .update(fastingAnalytics)
+    .set(updates)
+    .where(eq(fastingAnalytics.userId, userId));
+}
+
+export async function calculateFastingStats(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const sessions = await db.query.extendedFastingSessions.findMany({
+    where: (session: any, { eq }: any) => eq(session.userId, userId),
+  });
+
+  const completed = sessions.filter((s: any) => s.endTime !== null).length;
+  const abandoned = sessions.filter((s: any) => s.endTime === null).length;
+
+  // Calculate weight loss
+  let totalWeightLost = 0;
+  sessions.forEach((session: any) => {
+    if (session.weightBefore && session.weightAfter) {
+      totalWeightLost += parseFloat(session.weightBefore) - parseFloat(session.weightAfter);
+    }
+  });
+
+  // Calculate average duration
+  const completedDurations = sessions
+    .filter((s: any) => s.actualDuration)
+    .map((s: any) => s.actualDuration || 0);
+  const avgDuration = completedDurations.length > 0
+    ? completedDurations.reduce((a: number, b: number) => a + b, 0) / completedDurations.length
+    : 0;
+
+  return {
+    totalFasts: sessions.length,
+    completedFasts: completed,
+    abandonedFasts: abandoned,
+    totalWeightLost: totalWeightLost.toFixed(1),
+    averageFastDuration: Math.round(avgDuration),
+  };
 }

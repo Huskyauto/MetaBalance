@@ -582,3 +582,51 @@ export const bloodWorkResults = mysqlTable("blood_work_results", {
 
 export type BloodWorkResult = typeof bloodWorkResults.$inferSelect;
 export type InsertBloodWorkResult = typeof bloodWorkResults.$inferInsert;
+
+
+// Journey Initialization & Reminders
+export const journeyInitializations = mysqlTable('journey_initializations', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id').notNull().references(() => users.id),
+  startDate: timestamp('start_date').notNull(),
+  initialWeight: varchar('initial_weight', { length: 10 }),
+  goalWeight: varchar('goal_weight', { length: 10 }),
+  currentPhase: int('current_phase').default(1),
+  completedPhases: int('completed_phases').default(0),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type JourneyInitialization = typeof journeyInitializations.$inferSelect;
+export type InsertJourneyInitialization = typeof journeyInitializations.$inferInsert;
+
+export const supplementReminders = mysqlTable('supplement_reminders', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id').notNull().references(() => users.id),
+  supplementId: int('supplement_id').notNull().references(() => journeySupplements.id),
+  reminderTime: varchar('reminder_time', { length: 5 }).notNull(), // HH:MM format
+  enabled: boolean('enabled').default(true),
+  frequency: varchar('frequency', { length: 20 }).default('daily'), // daily, weekdays, weekends, custom
+  lastRemindedAt: timestamp('last_reminded_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type SupplementReminder = typeof supplementReminders.$inferSelect;
+export type InsertSupplementReminder = typeof supplementReminders.$inferInsert;
+
+export const fastingAnalytics = mysqlTable('fasting_analytics', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id').notNull().references(() => users.id),
+  totalFasts: int('total_fasts').default(0),
+  completedFasts: int('completed_fasts').default(0),
+  abandonedFasts: int('abandoned_fasts').default(0),
+  longestStreak: int('longest_streak').default(0),
+  currentStreak: int('current_streak').default(0),
+  totalWeightLost: varchar('total_weight_lost', { length: 10 }),
+  averageFastDuration: int('average_fast_duration'), // in hours
+  lastFastDate: timestamp('last_fast_date'),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type FastingAnalytic = typeof fastingAnalytics.$inferSelect;
+export type InsertFastingAnalytic = typeof fastingAnalytics.$inferInsert;
