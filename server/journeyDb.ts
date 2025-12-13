@@ -1,6 +1,6 @@
 import { getDb } from "./db";
 import { journeyPhases, journeySupplements, userSupplementLog, extendedFastingSessions, bloodWorkResults, journeyInitializations, supplementReminders, fastingAnalytics } from "../drizzle/schema";
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc } from "drizzle-orm";
 
 /**
  * Journey Phases
@@ -325,9 +325,10 @@ export async function getJourneyInitialization(userId: number) {
   
   const { journeyInitializations } = await import("../drizzle/schema");
   
-  return await db.query.journeyInitializations.findFirst({
-    where: (init: any, { eq }: any) => eq(init.userId, userId),
-  });
+  const results = await db.select().from(journeyInitializations)
+    .where(eq(journeyInitializations.userId, userId))
+    .limit(1);
+  return results[0] || null;
 }
 
 export async function updateJourneyPhase(userId: number, newPhase: number) {
@@ -363,12 +364,11 @@ export async function getSupplementReminders(userId: number) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.query.supplementReminders.findMany({
-    where: (reminder: any, { eq, and }: any) => and(
-      eq(reminder.userId, userId),
-      eq(reminder.enabled, true)
-    ),
-  });
+  return await db.select().from(supplementReminders)
+    .where(and(
+      eq(supplementReminders.userId, userId),
+      eq(supplementReminders.enabled, true)
+    ));
 }
 
 export async function updateSupplementReminder(reminderId: number, reminderTime: string, enabled: boolean) {
@@ -389,9 +389,10 @@ export async function getOrCreateFastingAnalytics(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  let analytics = await db.query.fastingAnalytics.findFirst({
-    where: (analytic: any, { eq }: any) => eq(analytic.userId, userId),
-  });
+  let results = await db.select().from(fastingAnalytics)
+    .where(eq(fastingAnalytics.userId, userId))
+    .limit(1);
+  let analytics = results[0] || null;
 
   if (!analytics) {
     await db.insert(fastingAnalytics).values({
@@ -403,9 +404,10 @@ export async function getOrCreateFastingAnalytics(userId: number) {
       currentStreak: 0,
     });
 
-    analytics = await db.query.fastingAnalytics.findFirst({
-      where: (analytic: any, { eq }: any) => eq(analytic.userId, userId),
-    });
+    results = await db.select().from(fastingAnalytics)
+      .where(eq(fastingAnalytics.userId, userId))
+      .limit(1);
+    analytics = results[0] || null;
   }
 
   return analytics;
@@ -425,9 +427,8 @@ export async function calculateFastingStats(userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const sessions = await db.query.extendedFastingSessions.findMany({
-    where: (session: any, { eq }: any) => eq(session.userId, userId),
-  });
+  const sessions = await db.select().from(extendedFastingSessions)
+    .where(eq(extendedFastingSessions.userId, userId));
 
   const completed = sessions.filter((s: any) => s.endTime !== null).length;
   const abandoned = sessions.filter((s: any) => s.endTime === null).length;

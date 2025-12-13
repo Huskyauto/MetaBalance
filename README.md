@@ -1,297 +1,462 @@
-# MetaBalance
+# MetaBalance - Your Metabolic Health Journey
 
-**Personalized Metabolic Health App for Obesity Reversal and Weight Loss**
+**A comprehensive, evidence-based weight loss and metabolic health tracking application with integrated 90lb Journey program.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-45%2F45%20passing-brightgreen)](https://github.com/Huskyauto/MetaBalance)
-[![Production Ready](https://img.shields.io/badge/status-production%20ready-success)](https://metabalance.manus.space)
+![MetaBalance Dashboard](./public/screenshot-dashboard.png)
 
-MetaBalance is a comprehensive web application designed to help individuals achieve sustainable weight loss and metabolic health through evidence-based strategies, AI coaching, and personalized tracking.
+---
 
-**🚀 [Try Live Demo](https://metabalance.manus.space)** | **📖 [Setup Guide](SETUP.md)** | **📝 [License](LICENSE)**
+## 🎯 Overview
 
-## ✅ App Status: Production Ready (Grade A+)
+MetaBalance is a production-ready web application designed to help users achieve sustainable weight loss through science-based protocols, daily habit tracking, and personalized insights. Built with the **90lb Journey** program at its core, it provides structured guidance through a 12-month, 4-phase transformation.
 
-**Live Demo:** https://metabalance.manus.space  
-**Latest Review:** December 7, 2025  
-**Test Coverage:** 45/45 tests passing ✅  
-**Critical Bugs:** Zero  
-**Performance:** Excellent (instant loading with database caching, foreign key constraints, performance indexes)  
-**Latest Update:** Production-ready improvements (database foreign keys, research auto-refresh, notification preferences UI)
+**Key Features:**
+- 📊 Comprehensive progress tracking (weight, meals, fasting, supplements)
+- 🏆 Achievement system with 18 unlockable badges  
+- 📈 AI-powered insights and personalized coaching
+- 📱 Progressive Web App (PWA) with offline support
+- 🌙 Dark/Light mode theming
+- 📄 PDF progress report export
+- 🎯 90lb Journey: 4-phase structured weight loss program
 
-## 📸 Screenshots
+---
 
-### Dashboard with Interactive Daily Wins & Streak Tracker
-![Dashboard](/screenshot-dashboard.png)
-*Track daily goals with clickable checkboxes, instant star updates, and confetti celebrations for 5-star days. Build streaks with consecutive 3+ star days.*
+## 🚀 Quick Start
 
-### Dietary Tracking with Nutrition Analytics
-![Dietary Tracking](/screenshot-dietary.png)
-*Log meals with detailed nutrition information, automatic food search via Spoonacular API, and real-time daily totals with progress bars.*
+### Prerequisites
+- Node.js 22.x
+- pnpm package manager
+- MySQL/TiDB database
 
-### Progress Tracking
-![Progress Tracking](/screenshot-progress.png)
-*Track weight and body measurements over time with visual charts and goal progress indicators.*
-
-> **Note:** Screenshots show the actual production app. Visit the [live demo](https://metabalance.manus.space) to experience the full interactive features.
-
-## 🎯 Features
-
-### Core Functionality
-- **Profile Management** - Track current weight, target weight, metabolic conditions, and health goals with automatic initialization
-- **Dietary Tracking** - Log meals with detailed nutrition information powered by Spoonacular API (300,000+ foods)
-- **Nutrition Analytics** - Visualize daily macros, calories, and progress toward personalized nutrition goals
-- **Interactive Daily Wins** - Click to complete 5 micro-goals daily with instant star updates (0-5 stars) and confetti celebration for perfect days
-- **Streak Tracking** - Build momentum with consecutive day counter (3+ stars), fire animations, and milestone celebrations (3/7/14/30 days)
-- **Progress Charts** - Visualize weight trends with 7/30/90-day views, projected goal completion date, and interactive Recharts graphs
-- **Weekly Reflection** - Answer 3 reflection questions weekly and receive AI-generated pattern insights
-- **Intermittent Fasting Coach** - Track fasting windows and schedules with adherence monitoring
-- **Supplement Library** - Manage supplement regimens with evidence-based information
-- **AI Health Coach** - Get personalized, context-aware advice powered by Grok AI with chat history
-- **Education Hub** - Learn about metabolic health, obesity reversal, and lifestyle strategies
-- **Weight Loss Research** - Access latest scientific findings and clinical trials (2024-2025) with instant loading and history tracking
-
-### AI-Powered Features
-- **Daily Insights** - Personalized motivational messages and health tips
-- **Conversational AI Coach** - Context-aware health coaching with chat history
-- **Research Summaries** - Grok AI generates comprehensive research content on:
-  - GLP-1 medications (Semaglutide, Tirzepatide, emerging drugs)
-  - Intermittent fasting protocols
-  - Nutrition science and dietary strategies
-  - Exercise and physical activity research
-  - Metabolic health and cellular mechanisms
-
-### Progressive Web App (PWA)
-- **Installable** - Add to home screen on mobile and desktop devices
-- **Offline Support** - Access core features without internet connection
-- **App-like Experience** - Standalone mode with native app feel
-- **Smart Caching** - Automatic caching of assets and API responses
-- **Install Prompt** - Friendly prompt to install the app
-- **Background Sync** - Sync data when connection is restored
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React 19** - Modern UI framework
-- **TypeScript** - Type-safe development
-- **Tailwind CSS 4** - Utility-first styling
-- **shadcn/ui** - High-quality component library
-- **Wouter** - Lightweight routing
-- **tRPC** - End-to-end typesafe APIs
-- **TanStack Query** - Data fetching and caching
-- **Vite PWA** - Progressive Web App support with Workbox
-
-### Backend
-- **Node.js 22** - JavaScript runtime
-- **Express 4** - Web framework
-- **tRPC 11** - Type-safe API layer
-- **Drizzle ORM** - Type-safe database queries
-- **MySQL/TiDB** - Relational database
-- **Vitest** - Unit testing framework
-
-### External APIs
-- **Spoonacular API** - Food and nutrition data
-- **Grok AI (xAI)** - AI coaching and research generation
-- **Manus OAuth** - Authentication system
-
-## 🚀 Getting Started
-
-### Quick Start (Recommended)
-
-The easiest way to try MetaBalance is to use the **[live demo](https://metabalance.manus.space)**.
-
-### Self-Hosting
-
-For local development or self-hosting, see the **[SETUP.md](SETUP.md)** guide for detailed instructions including:
-- Environment variable configuration
-- API key setup (Spoonacular, Grok AI)
-- Database initialization
-- Deployment options (Manus, Vercel, Railway)
-
-**Quick setup:**
+### Installation
 
 ```bash
-# Clone and install
-git clone https://github.com/Huskyauto/MetaBalance.git
-cd MetaBalance
+# Clone the repository
+git clone <repository-url>
+cd metabalance
+
+# Install dependencies
 pnpm install
 
-# Configure environment (see SETUP.md for details)
-cp .env.example .env
-# Edit .env with your API keys
+# Set up environment variables
+# (See Environment Variables section below)
 
-# Initialize database
+# Push database schema
 pnpm db:push
+
+# Seed journey supplements
+npx tsx server/seedJourneySupplements.ts
 
 # Start development server
 pnpm dev
 ```
 
-The app will be available at `http://localhost:3000`. See [SETUP.md](SETUP.md) for troubleshooting and deployment options.
+The app will be available at `http://localhost:3000`
+
+---
+
+## 📱 Core Features
+
+### Dashboard
+The central hub displaying:
+- **Today's Wins**: 5 daily goals with star-based progress tracking
+- **Streak Tracker**: Consecutive days with 3+ stars achieved
+- **Water Intake**: Visual glass counter (8 glasses/day goal)
+- **Weight Progress**: Current vs target weight with progress visualization
+- **Daily Insight**: AI-generated personalized guidance
+- **Quick Actions**: Navigate to Dietary Tracking, Progress, Achievements, and 90lb Journey
+
+### Dietary Tracking
+- Log meals with Spoonacular API nutrition data
+- Track calories, protein, carbs, fats, and fiber
+- Daily and weekly nutrition analytics
+- Meal history with edit/delete capabilities
+- Automatic protein goal tracking
+
+### Progress Tracking
+- Weight log with trend visualization
+- Body measurements tracking
+- Progress charts (7-day, 30-day, 90-day views)
+- **PDF Export**: Download comprehensive progress reports
+- Goal setting and milestone tracking
+
+### Fasting Tracker
+- Intermittent fasting schedule management
+- Fasting window tracking
+- Automatic daily goal integration
+- History and analytics
+
+### Achievement System
+**18 Achievements across 4 categories:**
+
+1. **Milestones** (2 badges)
+   - First Week Complete (Bronze)
+   - Meal Logger (Bronze)
+
+2. **Weight Loss** (5 badges)
+   - 5/10/25/50/100 Pounds Down (Bronze → Platinum)
+
+3. **Streaks** (4 badges)
+   - 7/30/100/365-day streaks (Bronze → Platinum)
+
+4. **Consistency** (4 badges)
+   - Perfect weeks/months, 100 meals logged, 50 perfect days
+
+**Features:**
+- Automatic unlock detection
+- Confetti animations on unlock
+- Progress tracking toward next achievement
+- Tier-based badges (Bronze/Silver/Gold/Platinum)
+
+---
+
+## 🏃 90lb Journey Program
+
+A structured, evidence-based 12-month program for sustainable weight loss.
+
+### Program Structure
+
+#### Phase 1: Foundation (Months 1-3)
+- **Goal**: 20-25 lbs loss
+- **Focus**: Habit formation, metabolic baseline
+- **Protocols**: Daily tracking, foundation supplements, 24-hour fasts
+
+#### Phase 2: Optimization (Months 4-6)
+- **Goal**: 20-25 lbs loss
+- **Focus**: Metabolic flexibility, advanced protocols
+- **Protocols**: 3-5 day fasts, advanced supplements
+
+#### Phase 3: Deep Reset (Months 7-9)
+- **Goal**: 20-25 lbs loss
+- **Focus**: Autophagy activation, metabolic reset
+- **Protocols**: 7-10 day fasts, full supplement stack
+
+#### Phase 4: Consolidation (Months 10-12)
+- **Goal**: 10-15 lbs loss
+- **Focus**: Maintenance, lifestyle integration
+- **Protocols**: Sustainable habits, long-term strategies
+
+### Journey Features
+
+#### 1. Phase-Based Tracker (`/journey`)
+- Visual phase timeline (4 phases over 12 months)
+- Progress tracking (time elapsed, weight lost)
+- Phase-specific guidance and tips
+- "Start My Journey" initialization
+
+#### 2. Supplement Tracker (`/journey/supplements`)
+**16 Evidence-Based Supplements:**
+
+**Foundation** (Phase 1+):
+- Electrolytes (Sodium, Potassium, Magnesium)
+- Magnesium Glycinate
+- B-Complex
+- Vitamin D3
+
+**Optional** (Phase 1+):
+- Berberine, NMN, Resveratrol, L-Theanine
+
+**Advanced** (Phase 2+):
+- Omega-3, Probiotics, Rhodiola, Capsinoids, Ashwagandha, Alpha-Lipoic Acid, Coenzyme Q10, Chromium Picolinate
+
+**Features:**
+- Daily supplement checklist
+- Phase-based recommendations
+- Monthly cost tracking ($388 total)
+- Category organization
+
+#### 3. Fasting Protocol Tracker (`/journey/fasting`)
+**Three Protocol Types:**
+
+- **24-Hour Fast**: Autophagy initiation, metabolic flexibility
+- **3-5 Day Fast**: Deep autophagy, metabolic reset, 3-8 lbs loss
+- **7-10 Day Fast**: Maximum autophagy, complete transformation, 7-15 lbs loss
+
+**Features:**
+- Live fasting timer
+- Electrolyte reminders
+- Refeeding safety warnings
+- Fasting history and success rate
+- Weight loss tracking per session
+
+#### 4. BMR/TDEE Calculator
+- **Mifflin-St Jeor equation** for accurate BMR calculation
+- Activity factor multiplier (1.2-1.9x)
+- Personalized 750 cal/day deficit recommendation
+- Save calculated values to profile
+
+---
+
+## 🎨 Design & User Experience
+
+### Theme System
+- **Light Mode** (default): Clean, professional interface
+- **Dark Mode**: OLED-friendly with reduced eye strain
+- Toggle in Settings page
+
+### Color Palette
+- **Primary**: Teal (#14b8a6) - Trust, health, growth
+- **Accents**: Warm orange/amber for streaks and achievements
+- **Backgrounds**: Soft gradients for cards and sections
+- **Text**: High contrast for accessibility
+
+### Typography
+- System font stack for native feel
+- Clear hierarchy (headings, body, captions)
+- Optimized for readability
+
+### Components
+- **shadcn/ui** component library
+- **Tailwind CSS 4** for styling
+- Responsive design (mobile-first)
+- Smooth animations and transitions
+
+---
+
+## 🛠️ Technical Stack
+
+### Frontend
+- **React 19**: Latest features and performance
+- **Wouter**: Lightweight routing
+- **TanStack Query**: Server state management
+- **Tailwind CSS 4**: Utility-first styling
+- **shadcn/ui**: High-quality components
+- **Vite**: Fast build tool
+
+### Backend
+- **Express 4**: Web server
+- **tRPC 11**: End-to-end type safety
+- **Drizzle ORM**: Type-safe database queries
+- **MySQL/TiDB**: Relational database
+
+### APIs & Services
+- **Spoonacular API**: Nutrition data (100,000+ foods)
+- **Grok API (xAI)**: AI-powered insights and coaching
+- **World Bank Data API**: Research data for insights
+- **Manus OAuth**: Authentication
+- **S3-compatible storage**: File uploads
+
+### Testing
+- **Vitest**: Unit and integration tests
+- **47 test suites** covering all tRPC procedures
+- **45/47 tests passing** (2 pre-existing data isolation issues)
+
+---
+
+## 📊 Database Schema
+
+**26 Tables:**
+
+### Core Tables
+- `users`: User accounts and profiles
+- `metabolicProfiles`: Health data, goals, medications
+- `weightLogs`: Weight tracking history
+- `bodyMeasurements`: Circumference measurements
+- `meals`: Meal entries with nutrition data
+- `fastingSchedules`: Fasting window definitions
+- `fastingLogs`: Fasting session records
+
+### Daily Tracking
+- `dailyGoals`: 5 daily goals with completion status
+- `weeklyReflections`: End-of-week reviews
+- `waterIntake`: Daily water consumption logs
+
+### 90lb Journey
+- `journeyPhases`: Phase tracking (1-4)
+- `journeySupplements`: Master supplement list (16 items)
+- `userSupplementLog`: Daily supplement tracking
+- `extendedFastingSessions`: 24hr, 3-5 day, 7-10 day fasts
+- `journeyInitializations`: User journey setup
+- `supplementReminders`: Notification scheduling
+- `fastingAnalytics`: Stats and trends
+- `bloodWorkResults`: Lab results tracking
+
+### Gamification
+- `achievements`: User achievement unlocks
+- `streakHistory`: Daily streak tracking
+- `favoriteFoods`: Quick-add frequently logged items
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```env
+# Database
+DATABASE_URL=mysql://user:password@host:port/database
+
+# Authentication
+JWT_SECRET=your-jwt-secret
+OAUTH_SERVER_URL=https://api.manus.im
+VITE_OAUTH_PORTAL_URL=https://login.manus.im
+VITE_APP_ID=your-app-id
+
+# Owner Info
+OWNER_OPEN_ID=owner-open-id
+OWNER_NAME=Owner Name
+
+# APIs
+SPOONACULAR_API_KEY=your-spoonacular-key
+XAI_API_KEY=your-xai-grok-key
+
+# Manus Built-in Services
+BUILT_IN_FORGE_API_URL=https://forge.manus.im
+BUILT_IN_FORGE_API_KEY=your-forge-key
+VITE_FRONTEND_FORGE_API_URL=https://forge.manus.im
+VITE_FRONTEND_FORGE_API_KEY=your-frontend-forge-key
+
+# Analytics
+VITE_ANALYTICS_ENDPOINT=https://analytics.manus.im
+VITE_ANALYTICS_WEBSITE_ID=your-website-id
+
+# App Branding
+VITE_APP_TITLE=MetaBalance
+VITE_APP_LOGO=/logo.svg
+```
+
+### Scripts
+
+```json
+{
+  "dev": "Start development server",
+  "build": "Build for production",
+  "preview": "Preview production build",
+  "test": "Run test suite",
+  "db:push": "Push schema changes to database",
+  "db:studio": "Open Drizzle Studio (database GUI)"
+}
+```
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](./public/screenshot-dashboard.png)
+*Today's Wins, Streak Tracker, Water Intake, and Weight Progress*
+
+### Dietary Tracking
+![Dietary Tracking](./public/screenshot-dietary.png)
+*Meal logging with nutrition breakdown*
+
+### Progress Tracking
+![Progress](./public/screenshot-progress.png)
+*Weight trends and PDF export*
+
+---
 
 ## 🧪 Testing
 
-Run the test suite:
+### Run Tests
 ```bash
 pnpm test
 ```
 
-Current test coverage:
-- **45 tests across 10 test files** - All passing ✅
-- Profile management and automatic initialization
-- Profile data persistence (test isolation with separate user IDs)
-- Meal logging and nutrition tracking
-- Daily goals and win score calculation
-- Weekly reflections and pattern recognition
-- Research content storage and retrieval
-- Nutrition goals calculation
-- API integrations (Spoonacular, Grok)
-- Authentication flows (login/logout)
-- Food search functionality
+### Test Coverage
+- **47 test suites** covering:
+  - Authentication flows
+  - tRPC procedure logic
+  - External API integrations (Spoonacular, Grok)
+  - PDF generation
+  - Achievement unlock detection
+  - Daily goal tracking
+  - Journey phase progression
 
-## 📁 Project Structure
-
-```
-metabalance/
-├── client/                 # Frontend application
-│   ├── public/            # Static assets
-│   └── src/
-│       ├── pages/         # Page components
-│       ├── components/    # Reusable UI components
-│       ├── contexts/      # React contexts
-│       ├── hooks/         # Custom hooks
-│       └── lib/           # Utilities and tRPC client
-├── server/                # Backend application
-│   ├── routers.ts         # tRPC API routes
-│   ├── db.ts              # Database queries
-│   ├── grok.ts            # Grok AI integration
-│   └── _core/             # Framework code
-├── drizzle/               # Database schema and migrations
-│   └── schema.ts          # Database tables
-├── shared/                # Shared types and constants
-└── storage/               # S3 storage helpers
-```
-
-## 🔑 Key Components
-
-### Profile Management
-- Automatic profile initialization for new users
-- Metabolic health tracking (obesity, diabetes, NAFLD)
-- Activity level and lifestyle factors
-- Goal setting and target dates
-
-### Dietary Tracking
-- Search 300,000+ foods via Spoonacular API
-- Detailed nutrition information (calories, macros, fiber)
-- Meal categorization (breakfast, lunch, dinner, snacks)
-- Serving size adjustments
-- "Log Again" quick re-logging for frequent foods
-
-### Nutrition Analytics
-- Daily calorie and macro tracking
-- Visual progress charts
-- Personalized nutrition goals based on:
-  - Current weight and target weight
-  - Height, age, gender
-  - Activity level
-  - Weight loss goals
-
-### Daily Wins & Micro-Goals
-- **5 Daily Micro-Goals** - Track process goals instead of outcome goals:
-  - Log 3+ Meals (breakfast, lunch, dinner)
-  - Hit Protein Goal (meet daily protein target)
-  - Complete Fast (finish fasting window)
-  - Log Exercise (record any physical activity)
-  - Drink Water (stay hydrated with 8+ glasses)
-- **Star Rating System** - Earn 0-5 stars based on goals completed
-- **Win Score Tracking** - Visual progress with star icons on dashboard
-- **Automatic Calculation** - Goals auto-complete based on logged data
-- **Daily Motivation** - Celebration messages for perfect days (5 stars)
-
-### Weekly Reflection & Pattern Recognition
-- **3-Question Reflection Form** - Answer weekly:
-  - What went well this week?
-  - What challenges did you face?
-  - What's your plan for next week?
-- **AI-Generated Insights** - Grok analyzes your responses and provides:
-  - Pattern recognition (e.g., "You skip logging on weekends")
-  - Personalized recommendations
-  - Actionable strategies for improvement
-- **Weekly Stats** - Automatic calculation of:
-  - Days logged (out of 7)
-  - Average win score (0-5 stars)
-- **Reflection History** - View past reflections to track progress over time
-- **Metacognitive Learning** - Increases weight loss success by 15% through self-awareness
-
-### Weight Loss Research (Enhanced)
-- **Instant Loading** - Research cached in database for immediate access (no 30-60 second wait)
-- **Visible Tab Labels** - Clear text labels on all research categories (mobile-friendly)
-- **Research History** - Automatic saving of all generated research with timestamps
-- **Category Filtering** - Filter history by research type (Overview, GLP-1, Fasting, etc.)
-- **Latest Timestamp** - Shows when research was last generated
-- 6 research categories with comprehensive content:
-  - Overview of 2024-2025 breakthroughs (Retatrutide 24.2% weight loss, oral GLP-1 drugs)
-  - GLP-1 medications and clinical trials (SURMOUNT-5, ACHIEVE-1, EQUATE-2)
-  - Intermittent fasting science and protocols
-  - Nutrition strategies and dietary approaches
-  - Exercise research and physical activity
-  - Metabolic health mechanisms (mitochondrial function, NAD+ levels)
-
-## 🚀 Deployment
-
-The app is designed to be deployed on platforms supporting Node.js applications:
-- **Manus Platform** (recommended) - Built-in hosting with custom domain support
-- Vercel
-- Railway
-- Render
-- AWS/Azure/GCP
-
-Ensure environment variables are properly configured in your deployment platform.
-
-### Automatic GitHub Sync
-
-The project is configured with automatic GitHub synchronization:
-- **Post-commit hook** - Automatically pushes all commits to GitHub
-- **Dual remotes** - Syncs to both Manus (`origin`) and GitHub (`github`) repositories
-- **Zero manual steps** - Every `webdev_save_checkpoint` or git commit automatically updates GitHub
-- **Repository URL** - https://github.com/Huskyauto/MetaBalance
-
-The git hook is located at `.git/hooks/post-commit` and runs after every commit.
-
-### PWA Installation
-Once deployed, users can install MetaBalance as a Progressive Web App:
-1. Visit the app URL in a modern browser
-2. Click the "Install" button in the app or browser prompt
-3. App will be added to home screen (mobile) or applications folder (desktop)
-4. Enjoy native app experience with offline support
-
-## 🎨 Design Features
-
-- **Custom App Icon** - AI-generated heartbeat/pulse motif with teal gradient
-- **Responsive Design** - Optimized for mobile, tablet, and desktop
-- **Dark Theme** - Professional dark mode with teal accent colors
-- **Accessible** - Keyboard navigation, focus states, semantic HTML
-- **Fast Loading** - Optimized bundle size with smart caching strategies
-
-## 📝 License
-
-This project is private and proprietary.
-
-## 👥 Contributing
-
-This is a personal health application. Contributions are not currently accepted.
-
-## 📧 Contact
-
-For questions or support, please contact the repository owner.
-
-## 🙏 Acknowledgments
-
-- **Spoonacular API** - Comprehensive food and nutrition database
-- **xAI Grok** - Advanced AI language model for coaching and research
-- **shadcn/ui** - Beautiful and accessible component library
-- **Manus Platform** - Development and deployment infrastructure
+### Current Status
+- ✅ 45/47 tests passing
+- ⚠️ 2 pre-existing data isolation issues in `dailyGoalsAndReflections.test.ts`
 
 ---
 
-**Disclaimer**: This application is for informational purposes only and does not constitute medical advice. Always consult with qualified healthcare professionals before making changes to your diet, exercise routine, or medication regimen.
+## 🚀 Deployment
+
+### Build for Production
+```bash
+pnpm build
+```
+
+### Deployment Options
+1. **Manus Platform** (Recommended)
+   - Built-in hosting with custom domains
+   - One-click publish from Management UI
+   - Automatic SSL certificates
+   - Edge CDN distribution
+
+2. **Self-Hosted**
+   - Deploy `dist/` folder to any static host
+   - Run `node server/index.js` for backend
+   - Configure reverse proxy (nginx/Apache)
+   - Set up SSL certificates
+
+---
+
+## 📖 User Guide
+
+### Getting Started
+1. **Sign Up**: Create account via Manus OAuth
+2. **Set Profile**: Enter current weight, target weight, health conditions
+3. **Initialize Journey**: Click "Start My Journey" to begin 90lb Journey
+4. **Daily Tracking**: Complete 5 daily goals for stars and streaks
+5. **Log Meals**: Track nutrition with Spoonacular database
+6. **Monitor Progress**: View weight trends and export PDF reports
+
+### Daily Workflow
+1. **Morning**: Log weight, check Today's Wins
+2. **Meals**: Log breakfast, lunch, dinner with nutrition data
+3. **Hydration**: Track water intake (8 glasses goal)
+4. **Fasting**: Complete fasting window
+5. **Exercise**: Log physical activity
+6. **Evening**: Review progress, check achievements
+
+### 90lb Journey Workflow
+1. **Phase 1 Start**: Initialize journey, begin foundation supplements
+2. **Weekly**: Log weight, complete daily goals, track streaks
+3. **Monthly**: Review phase progress, adjust protocols
+4. **Phase Transitions**: Advance to next phase when milestones met
+5. **Fasting Protocols**: Schedule and complete extended fasts
+6. **Supplement Management**: Check off daily supplements
+7. **Blood Work**: Track metabolic markers at baseline and end
+
+---
+
+## 🎯 Roadmap
+
+### Planned Features
+1. **Journey Onboarding Modal**: Guided setup wizard
+2. **Supplement Reminder Notifications**: Push notifications with snooze
+3. **Fasting Analytics Dashboard**: Charts and trends
+4. **Social Sharing**: Share achievements on social media
+5. **Friends Leaderboard**: Community competition
+6. **Goal History Calendar**: Monthly heatmap view
+7. **Favorite Foods UI**: Quick-add frequently logged items
+8. **Blood Work Tracking UI**: Lab results visualization
+
+---
+
+## 📝 License
+
+Proprietary - All rights reserved
+
+---
+
+## 🙏 Acknowledgments
+
+- **90lb Journey Program**: Evidence-based weight loss protocols
+- **Spoonacular**: Comprehensive nutrition database
+- **xAI Grok**: AI-powered health insights
+- **Manus Platform**: Hosting and infrastructure
+- **shadcn/ui**: Beautiful component library
+
+---
+
+## 📞 Support
+
+For questions, issues, or feature requests:
+- Submit feedback at https://help.manus.im
+- Check documentation in `/docs` folder
+- Review `WORK_SUMMARY.md` for implementation details
+
+---
+
+**Built with ❤️ for sustainable metabolic health transformation**

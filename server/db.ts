@@ -15,7 +15,10 @@ import {
   dailyGoals, InsertDailyGoal,
   weeklyReflections, InsertWeeklyReflection,
   waterIntake, InsertWaterIntake,
-  achievements, InsertAchievement
+  achievements, InsertAchievement,
+  journeyPhases, journeySupplements, userSupplementLog,
+  extendedFastingSessions, bloodWorkResults,
+  supplementReminders, fastingAnalytics, journeyInitializations
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
