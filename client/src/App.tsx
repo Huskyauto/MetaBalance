@@ -45,9 +45,9 @@ function Router() {
       <Route path={"/settings"} component={Settings} />
       <Route path={"/achievements"} component={Achievements} />
       <Route path={"/journey"} component={JourneyDashboard} />
-      <Route path={"/journey-supplements"} component={JourneySupplementTracker} />
-      <Route path={"/fasting-protocol"} component={FastingProtocolTracker} />
-      <Route path={"/bmr-calculator"} component={BMRCalculator} />
+      <Route path={"/journey/supplements"} component={JourneySupplementTracker} />
+      <Route path={"/journey/fasting"} component={FastingProtocolTracker} />
+      <Route path={"/journey/bmr-calculator"} component={BMRCalculator} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
