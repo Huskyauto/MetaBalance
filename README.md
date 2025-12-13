@@ -64,7 +64,18 @@ The central hub displaying:
 - **Water Intake**: Visual glass counter (8 glasses/day goal)
 - **Weight Progress**: Current vs target weight with progress visualization
 - **Daily Insight**: AI-generated personalized guidance
-- **Quick Actions**: Navigate to Dietary Tracking, Progress, Achievements, and 90lb Journey
+- **Feature Cards**: Quick access to all major features including:
+  - Dietary Tracking
+  - Fasting Coach
+  - Supplements
+  - Progress Tracking
+  - AI Coach
+  - **90lb Journey** (highlighted with teal gradient)
+  - Achievements
+  - Education
+  - Weight Loss Research
+  - Health Profile
+  - Weekly Reflection
 
 ### Dietary Tracking
 - Log meals with Spoonacular API nutrition data
