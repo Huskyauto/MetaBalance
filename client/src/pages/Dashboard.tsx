@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar, Trophy } from "lucide-react";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar, Trophy, Target } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyWins } from "@/components/DailyWins";
@@ -226,6 +226,22 @@ export default function Dashboard() {
                   <div>
                     <CardTitle>AI Coach</CardTitle>
                     <CardDescription>Get personalized advice</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/journey">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 border-teal-200 dark:border-teal-800">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+                    <Target className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                  </div>
+                  <div>
+                    <CardTitle>90lb Journey</CardTitle>
+                    <CardDescription>4-phase structured program</CardDescription>
                   </div>
                 </div>
               </CardHeader>
