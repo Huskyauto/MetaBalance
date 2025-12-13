@@ -900,3 +900,6 @@
 - [x] Add "Reset Journey" button to allow users to restart their 90lb Journey
 - [x] Create backend procedure to delete all journey phases and related data
 - [x] Add confirmation dialog before resetting
+
+## UX Issue (User - Dec 13, 2025)
+- [x] Add back button/arrow to Journey page to navigate back to Dashboard

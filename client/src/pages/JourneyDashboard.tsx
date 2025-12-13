@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { trpc } from '@/lib/trpc';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ArrowLeft } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 interface Phase {
   id: number;
@@ -29,6 +31,7 @@ export function JourneyDashboard() {
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhase, setCurrentPhase] = useState<Phase | null>(null);
   const [loading, setLoading] = useState(true);
+  const [, setLocation] = useLocation();
 
   const getAllPhasesQuery = trpc.journey.getAllPhases.useQuery();
   const getCurrentPhaseQuery = trpc.journey.getCurrentPhase.useQuery();
@@ -76,11 +79,20 @@ export function JourneyDashboard() {
 
   if (!phases.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Journey Not Started</CardTitle>
-          <CardDescription>Initialize your 90lb Journey to get started</CardDescription>
-        </CardHeader>
+      <div className="space-y-6">
+        <Button
+          variant="ghost"
+          onClick={() => setLocation('/dashboard')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Journey Not Started</CardTitle>
+            <CardDescription>Initialize your 90lb Journey to get started</CardDescription>
+          </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             The 90lb Journey is a 12-month, 4-phase program designed to safely and sustainably achieve significant weight loss through evidence-based protocols.
@@ -92,12 +104,21 @@ export function JourneyDashboard() {
             {initializeJourneyMutation.isPending ? 'Initializing...' : 'Start My Journey'}
           </Button>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <Button
+        variant="ghost"
+        onClick={() => setLocation('/dashboard')}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Button>
       {/* Current Phase Overview */}
       {currentPhase && (
         <Card className="border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950">
