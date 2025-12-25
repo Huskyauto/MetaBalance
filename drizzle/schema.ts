@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, index, uniqueIndex, foreignKey } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, date, index, uniqueIndex, foreignKey } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -630,3 +630,90 @@ export const fastingAnalytics = mysqlTable('fasting_analytics', {
 
 export type FastingAnalytic = typeof fastingAnalytics.$inferSelect;
 export type InsertFastingAnalytic = typeof fastingAnalytics.$inferInsert;
+
+/**
+ * Emotional Eating Logs - Track emotional eating episodes with triggers and patterns
+ */
+export const emotionalEatingLogs = mysqlTable("emotional_eating_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  
+  // Trigger information
+  triggerEmotion: mysqlEnum("triggerEmotion", ["stress", "anxiety", "sadness", "boredom", "anger", "loneliness", "other"]).notNull(),
+  triggerDescription: text("triggerDescription"),
+  situation: text("situation"),
+  
+  // Food consumed
+  foodConsumed: text("foodConsumed").notNull(),
+  estimatedCalories: int("estimatedCalories"),
+  
+  // Intensity and coping
+  intensity: int("intensity").notNull(), // 1-10 scale
+  copingStrategyUsed: text("copingStrategyUsed"),
+  effectivenessRating: int("effectivenessRating"), // 1-10 scale, null if no strategy used
+  
+  notes: text("notes"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EmotionalEatingLog = typeof emotionalEatingLogs.$inferSelect;
+export type InsertEmotionalEatingLog = typeof emotionalEatingLogs.$inferInsert;
+
+/**
+ * Medications - Track medications including GLP-1 agonists, SSRIs, and other treatments
+ */
+export const medications = mysqlTable("medications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  name: varchar("name", { length: 255 }).notNull(),
+  type: mysqlEnum("type", [
+    "glp1_agonist",      // Semaglutide, Liraglutide, etc.
+    "ssri",              // Fluoxetine, Sertraline, etc.
+    "stimulant",         // Lisdexamfetamine (Vyvanse), etc.
+    "combination",       // Bupropion/Naltrexone, Phentermine/Topiramate
+    "other"
+  ]).notNull(),
+  
+  dosage: varchar("dosage", { length: 100 }).notNull(), // e.g., "1mg", "20mg", "0.5ml"
+  frequency: varchar("frequency", { length: 100 }).notNull(), // e.g., "once daily", "twice daily", "weekly"
+  
+  startDate: date("startDate").notNull(),
+  endDate: date("endDate"), // null if currently taking
+  
+  prescribedFor: text("prescribedFor"), // e.g., "Binge Eating Disorder", "Weight Loss", "Depression"
+  sideEffects: text("sideEffects"), // Track any side effects
+  effectiveness: int("effectiveness"), // 1-10 scale, user's subjective rating
+  
+  notes: text("notes"),
+  active: boolean("active").default(true).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Medication = typeof medications.$inferSelect;
+export type InsertMedication = typeof medications.$inferInsert;
+
+/**
+ * Medication Logs - Track daily medication adherence
+ */
+export const medicationLogs = mysqlTable("medication_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  medicationId: int("medicationId").notNull().references(() => medications.id, { onDelete: "cascade" }),
+  
+  takenAt: timestamp("takenAt").notNull(),
+  dosageTaken: varchar("dosageTaken", { length: 100 }).notNull(),
+  
+  sideEffectsNoted: text("sideEffectsNoted"),
+  notes: text("notes"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MedicationLog = typeof medicationLogs.$inferSelect;
+export type InsertMedicationLog = typeof medicationLogs.$inferInsert;

@@ -10,6 +10,7 @@ import { autocompleteIngredients, getIngredientNutrition } from "./spoonacular";
 import { ensureProfileInitialized, getOwnerProfileDefaults } from "./profileInit";
 import { ACHIEVEMENT_DEFINITIONS, checkUnlockedAchievements } from "./achievements";
 import { journeyRouter, journeySupplementsRouter, fastingRouter, bloodWorkRouter } from "./journeyRouter";
+import { emotionalEatingRouter } from "./emotionalEatingRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -878,5 +879,6 @@ Be supportive, motivational, and practical in your responses.`;
   journeySupplements: journeySupplementsRouter,
   journeyFasting: fastingRouter,
   journeyBloodWork: bloodWorkRouter,
+  emotionalEating: emotionalEatingRouter,
 });
 export type AppRouter = typeof appRouter;
