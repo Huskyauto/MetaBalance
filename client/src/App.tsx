@@ -23,8 +23,6 @@ import { JourneyDashboard } from "./pages/JourneyDashboard";
 import { JourneySupplementTracker } from "./pages/JourneySupplementTracker";
 import { FastingProtocolTracker } from "./pages/FastingProtocolTracker";
 import { BMRCalculator } from "./components/BMRCalculator";
-import EmotionalEating from "./pages/EmotionalEating";
-import Medications from "./pages/Medications";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { AchievementUnlockNotification } from "./components/AchievementUnlockNotification";
 
@@ -50,8 +48,6 @@ function Router() {
       <Route path={"/journey/supplements"} component={JourneySupplementTracker} />
       <Route path={"/journey/fasting"} component={FastingProtocolTracker} />
       <Route path={"/journey/bmr-calculator"} component={BMRCalculator} />
-      <Route path={"/emotional-eating"} component={EmotionalEating} />
-      <Route path={"/medications"} component={Medications} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
