@@ -10,7 +10,17 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "server:restart": "./scripts/restart-server.sh",
+    "server:restart:dev": "./scripts/restart-server.sh dev",
+    "server:restart:prod": "./scripts/restart-server.sh prod",
+    "server:health": "node scripts/health-check.mjs",
+    "server:monitor": "node scripts/server-monitor.mjs start",
+    "server:monitor:stop": "node scripts/server-monitor.mjs stop",
+    "server:monitor:status": "node scripts/server-monitor.mjs status",
+    "logs:errors": "node scripts/error-logger.mjs stats",
+    "logs:tail": "node scripts/error-logger.mjs tail",
+    "logs:clear": "node scripts/error-logger.mjs clear"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
