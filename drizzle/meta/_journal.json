@@ -64,6 +64,13 @@
       "when": 1766880486368,
       "tag": "0008_brief_christian_walker",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1766894334678,
+      "tag": "0009_young_killmonger",
+      "breakpoints": true
     }
   ]
 }

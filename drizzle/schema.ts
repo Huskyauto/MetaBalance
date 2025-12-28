@@ -717,3 +717,87 @@ export const medicationLogs = mysqlTable("medication_logs", {
 
 export type MedicationLog = typeof medicationLogs.$inferSelect;
 export type InsertMedicationLog = typeof medicationLogs.$inferInsert;
+
+
+/**
+ * Mindfulness Exercises - Library of guided exercises based on MB-EAT protocol
+ */
+export const mindfulnessExercises = mysqlTable("mindfulness_exercises", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  
+  category: mysqlEnum("category", [
+    "breathing",      // Deep breathing, box breathing
+    "urge_surfing",   // Ride out cravings without acting
+    "mindful_eating", // Eat slowly, savor each bite
+    "body_scan",      // Progressive relaxation
+    "meditation",     // General mindfulness meditation
+    "grounding"       // 5-4-3-2-1 senses technique
+  ]).notNull(),
+  
+  duration: int("duration").notNull(), // Duration in minutes
+  difficulty: mysqlEnum("difficulty", ["beginner", "intermediate", "advanced"]).default("beginner").notNull(),
+  
+  // Guided content
+  instructions: text("instructions").notNull(), // Step-by-step instructions
+  audioUrl: text("audioUrl"), // Optional audio guide URL
+  imageUrl: text("imageUrl"), // Optional illustration URL
+  
+  // Metadata
+  benefits: text("benefits"), // JSON array of benefits
+  bestFor: text("bestFor"), // e.g., "Before meals", "During cravings", "Before bed"
+  
+  isActive: boolean("isActive").default(true).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MindfulnessExercise = typeof mindfulnessExercises.$inferSelect;
+export type InsertMindfulnessExercise = typeof mindfulnessExercises.$inferInsert;
+
+/**
+ * Mindfulness Sessions - Track user's completed mindfulness practice sessions
+ */
+export const mindfulnessSessions = mysqlTable("mindfulness_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  exerciseId: int("exerciseId").notNull().references(() => mindfulnessExercises.id, { onDelete: "cascade" }),
+  
+  startedAt: timestamp("startedAt").notNull(),
+  completedAt: timestamp("completedAt"),
+  
+  durationMinutes: int("durationMinutes").notNull(), // Actual duration practiced
+  completed: boolean("completed").default(false).notNull(),
+  
+  // User feedback
+  moodBefore: mysqlEnum("moodBefore", ["very_low", "low", "neutral", "good", "great"]),
+  moodAfter: mysqlEnum("moodAfter", ["very_low", "low", "neutral", "good", "great"]),
+  
+  cravingIntensityBefore: int("cravingIntensityBefore"), // 1-10 scale
+  cravingIntensityAfter: int("cravingIntensityAfter"), // 1-10 scale
+  
+  notes: text("notes"),
+  
+  // Context - what triggered the session
+  trigger: mysqlEnum("trigger", [
+    "scheduled",      // Regular practice
+    "craving",        // Responding to food craving
+    "stress",         // Stress relief
+    "emotional",      // Emotional eating urge
+    "before_meal",    // Pre-meal ritual
+    "other"
+  ]),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("mindfulness_sessions_userId_idx").on(table.userId),
+  exerciseIdIdx: index("mindfulness_sessions_exerciseId_idx").on(table.exerciseId),
+  startedAtIdx: index("mindfulness_sessions_startedAt_idx").on(table.startedAt),
+}));
+
+export type MindfulnessSession = typeof mindfulnessSessions.$inferSelect;
+export type InsertMindfulnessSession = typeof mindfulnessSessions.$inferInsert;

@@ -11,6 +11,7 @@ import { ensureProfileInitialized, getOwnerProfileDefaults } from "./profileInit
 import { ACHIEVEMENT_DEFINITIONS, checkUnlockedAchievements } from "./achievements";
 import { journeyRouter, journeySupplementsRouter, fastingRouter, bloodWorkRouter } from "./journeyRouter";
 import { emotionalEatingRouter } from "./emotionalEatingRouter";
+import { mindfulnessRouter } from "./mindfulnessRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -880,5 +881,6 @@ Be supportive, motivational, and practical in your responses.`;
   journeyFasting: fastingRouter,
   journeyBloodWork: bloodWorkRouter,
   emotionalEating: emotionalEatingRouter,
+  mindfulness: mindfulnessRouter,
 });
 export type AppRouter = typeof appRouter;

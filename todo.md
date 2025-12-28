@@ -61,8 +61,18 @@
 - [x] Verify Dashboard has Emotional Eating and Medications cards
 - [x] Verify routes /emotional-eating and /medications work
 
-### Phase 2 - Therapeutic Protocols (Future)
-- [ ] Mindfulness Exercises Library
+### Phase 2 - Therapeutic Protocols (In Progress)
+- [x] Mindfulness Exercises Library
+  - [x] Create mindfulness_exercises database table (exercise definitions)
+  - [x] Create mindfulness_sessions database table (user session tracking)
+  - [x] Add database functions for exercises CRUD and session logging
+  - [x] Create tRPC procedures for mindfulness features
+  - [x] Build Mindfulness page with exercise library
+  - [x] Add guided exercises: breathing, urge surfing, mindful eating, body scan
+  - [x] Implement session timer and completion tracking
+  - [x] Add progress stats (total sessions, streaks, favorite exercises)
+  - [x] Add Mindfulness card to Dashboard
+  - [x] Test all mindfulness features (8 tests passing)
 - [ ] DBT Skills Module
 - [ ] Cognitive Restructuring Journal
 

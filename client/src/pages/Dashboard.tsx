@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar, Trophy, Target, Brain } from "lucide-react";
+import { Activity, Apple, Clock, Pill, TrendingDown, MessageSquare, BookOpen, LogOut, Settings, FlaskConical, Calendar, Trophy, Target, Brain, Sparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyWins } from "@/components/DailyWins";
@@ -306,6 +306,22 @@ export default function Dashboard() {
                   <div>
                     <CardTitle>Medications</CardTitle>
                     <CardDescription>Track treatment & adherence</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/mindfulness">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 border-indigo-200 dark:border-indigo-800">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                    <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <CardTitle>Mindfulness</CardTitle>
+                    <CardDescription>MB-EAT exercises & urge surfing</CardDescription>
                   </div>
                 </div>
               </CardHeader>

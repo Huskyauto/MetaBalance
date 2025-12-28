@@ -25,6 +25,7 @@ import { FastingProtocolTracker } from "./pages/FastingProtocolTracker";
 import { BMRCalculator } from "./components/BMRCalculator";
 import EmotionalEating from "./pages/EmotionalEating";
 import Medications from "./pages/Medications";
+import Mindfulness from "./pages/Mindfulness";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { AchievementUnlockNotification } from "./components/AchievementUnlockNotification";
 
@@ -52,6 +53,7 @@ function Router() {
       <Route path={"/journey/bmr-calculator"} component={BMRCalculator} />
       <Route path={"/emotional-eating"} component={EmotionalEating} />
       <Route path={"/medications"} component={Medications} />
+      <Route path={"/mindfulness"} component={Mindfulness} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
