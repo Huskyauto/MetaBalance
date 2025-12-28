@@ -903,3 +903,30 @@
 
 ## UX Issue (User - Dec 13, 2025)
 - [x] Add back button/arrow to Journey page to navigate back to Dashboard
+
+
+## Emotional Eating Integration (User Request - Dec 20, 2025)
+### Phase 1: Core Features
+- [ ] Create emotional_eating_logs table in database schema
+- [ ] Add backend procedures for emotional eating tracking (log, get history, get analytics)
+- [ ] Build Emotional Eating Tracker UI page
+- [ ] Add emotional eating analytics dashboard (triggers, patterns, trends)
+- [ ] Extend supplement tracker to include psychobiotic strains (L. helveticus, B. longum, L. rhamnosus, L. plantarum)
+- [ ] Create medications table and tracking system
+- [ ] Build Medication Tracker UI
+- [ ] Add educational content on gut-brain axis and emotional eating
+
+### Phase 2: Therapeutic Protocols
+- [ ] Create mindfulness_exercises and mindfulness_completions tables
+- [ ] Build Mindfulness Exercises library with guided practices
+- [ ] Create dbt_skills and dbt_skill_usage tables
+- [ ] Build DBT Skills module (Distress Tolerance + Emotion Regulation)
+- [ ] Create cognitive_restructuring_entries table
+- [ ] Build Cognitive Restructuring Journal UI
+
+### Phase 3: Advanced Features
+- [ ] Create trigger_response_library table
+- [ ] Build personalized Trigger-Response Library
+- [ ] Enhance AI Coach with emotional eating protocols
+- [ ] Integrate emotional eating management into 90lb Journey phases
+- [ ] Add weekly emotional eating review and progress tracking
