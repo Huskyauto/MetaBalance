@@ -58,7 +58,7 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Serve static files with explicit MIME types and no-cache for JS/CSS
+  // Serve static files with explicit MIME types and aggressive cache-busting
   app.use(express.static(distPath, {
     setHeaders: (res, filePath) => {
       // Force correct MIME types for JavaScript modules
@@ -83,7 +83,13 @@ export function serveStatic(app: Express) {
       } else {
         // No cache for HTML and other files
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
       }
+      
+      // Additional headers to prevent proxy caching issues
+      res.setHeader('Vary', 'Accept-Encoding');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     }
   }));
 
