@@ -27,3 +27,12 @@
 4. Configured proper cache control (immutable for hashed assets, no-cache for HTML)
 
 **Result:** Website now loads perfectly on https://3001-ik3jagki4gyahl72h1bhg-e4bb4e30.manusvm.computer/
+
+
+## Published Site Issue (Dec 27, 2025)
+- [x] Investigate why published site doesn't load - Port 3001 not standard for publishing
+- [x] Check if port configuration affects published deployment - Reverted to port 3000
+- [x] Verify published site uses correct server configuration - MIME types in place
+- [x] Rebuild with port 3000 and MIME type fixes
+- [ ] Save checkpoint and republish
+- [ ] Test published site loads correctly
