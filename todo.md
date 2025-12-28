@@ -34,5 +34,16 @@
 - [x] Check if port configuration affects published deployment - Reverted to port 3000
 - [x] Verify published site uses correct server configuration - MIME types in place
 - [x] Rebuild with port 3000 and MIME type fixes
-- [ ] Save checkpoint and republish
-- [ ] Test published site loads correctly
+- [x] Add aggressive cache-busting headers (Pragma, Expires, Vary)
+- [x] Save checkpoint (42bfc9c4) - ready to republish
+- [ ] User to click Publish button in UI
+- [ ] Test published site after deployment completes
+
+
+## Dev Server EMFILE Error Blocking Publish (Dec 27, 2025)
+- [x] Fix file watcher EMFILE error permanently - Disabled HMR and file watching
+- [x] Configure Vite to disable file watchers (watch: null, hmr: false)
+- [x] Removed tsx watch mode from dev script
+- [x] Restart dev server successfully - Running on port 3000
+- [x] Verify preview screenshot generates - Screenshot captured!
+- [ ] Save checkpoint and complete publish

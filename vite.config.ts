@@ -117,9 +117,6 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-    watch: {
-      usePolling: true,
-      interval: 1000,
-    },
+    watch: null, // Disable file watching to prevent EMFILE errors
   },
 });
