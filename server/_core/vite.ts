@@ -58,10 +58,39 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Serve static files with explicit MIME types and no-cache for JS/CSS
+  app.use(express.static(distPath, {
+    setHeaders: (res, filePath) => {
+      // Force correct MIME types for JavaScript modules
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+      } else if (filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=UTF-8');
+      } else if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+      } else if (filePath.endsWith('.wasm')) {
+        res.setHeader('Content-Type', 'application/wasm');
+      }
+      
+      // Add cache control
+      if (filePath.includes('/assets/')) {
+        // Long cache for hashed assets
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        // No cache for HTML and other files
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
