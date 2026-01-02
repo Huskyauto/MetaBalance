@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Activity, LineChart, Timer, Bot, Utensils, ArrowRight } from "lucide-react";
+import { LineChart, Timer, Bot, Utensils, ArrowRight } from "lucide-react";
 
 export function Landing() {
   return (
@@ -9,9 +9,7 @@ export function Landing() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between gap-4 px-4 mx-auto max-w-7xl">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-              <Activity className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src="/icons/icon-512x512.png" alt="MetaBalance" className="h-8 w-8 rounded-md" />
             <span className="font-semibold text-lg">MetaBalance</span>
           </div>
           <div className="flex items-center gap-2">
