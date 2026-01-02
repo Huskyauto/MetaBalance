@@ -45,7 +45,7 @@ function AuthenticatedApp() {
       <main className="container mx-auto max-w-7xl px-4 py-6">
         {renderPage()}
       </main>
-      <QuickActions />
+      {currentPage !== "coach" && <QuickActions />}
     </div>
   );
 }
