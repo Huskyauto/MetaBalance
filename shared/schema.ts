@@ -223,6 +223,25 @@ export const copingStrategiesRelations = relations(copingStrategies, ({ one }) =
   }),
 }));
 
+// Workshop progress tracking - 5-day emotional eating workshop
+export const workshopProgress = pgTable("workshop_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  dayNumber: integer("day_number").notNull(), // 1-5
+  exerciseResponse: text("exercise_response"),
+  reflectionResponse: text("reflection_response"),
+  completed: boolean("completed").default(false),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const workshopProgressRelations = relations(workshopProgress, ({ one }) => ({
+  user: one(users, {
+    fields: [workshopProgress.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertWeightLogSchema = createInsertSchema(weightLogs).omit({ id: true, createdAt: true });
@@ -243,6 +262,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({ i
 export const insertMoodCheckInSchema = createInsertSchema(moodCheckIns).omit({ id: true, createdAt: true });
 export const insertEmotionalJournalSchema = createInsertSchema(emotionalJournals).omit({ id: true, createdAt: true });
 export const insertCopingStrategySchema = createInsertSchema(copingStrategies).omit({ id: true, createdAt: true });
+export const insertWorkshopProgressSchema = createInsertSchema(workshopProgress).omit({ id: true, createdAt: true, completedAt: true });
 
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -274,3 +294,6 @@ export type EmotionalJournal = typeof emotionalJournals.$inferSelect;
 
 export type InsertCopingStrategy = z.infer<typeof insertCopingStrategySchema>;
 export type CopingStrategy = typeof copingStrategies.$inferSelect;
+
+export type InsertWorkshopProgress = z.infer<typeof insertWorkshopProgressSchema>;
+export type WorkshopProgress = typeof workshopProgress.$inferSelect;

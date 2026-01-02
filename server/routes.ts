@@ -5,7 +5,8 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertWeightLogSchema, insertMealSchema, 
   insertFastingSessionSchema, insertChatMessageSchema,
-  insertMoodCheckInSchema, insertEmotionalJournalSchema, insertCopingStrategySchema
+  insertMoodCheckInSchema, insertEmotionalJournalSchema, insertCopingStrategySchema,
+  insertWorkshopProgressSchema
 } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
@@ -636,6 +637,46 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete coping strategy" });
+    }
+  });
+
+  // ============ Workshop Progress Routes ============
+
+  app.get("/api/workshop-progress", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const progress = await storage.getWorkshopProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get workshop progress" });
+    }
+  });
+
+  app.post("/api/workshop-progress", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const data = insertWorkshopProgressSchema.parse({ ...req.body, userId });
+      const progress = await storage.upsertWorkshopProgress(data);
+      res.json(progress);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to save workshop progress" });
+    }
+  });
+
+  app.post("/api/workshop-progress/:dayNumber/complete", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const dayNumber = parseInt(req.params.dayNumber);
+      if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 5) {
+        return res.status(400).json({ error: "Invalid day number" });
+      }
+      const progress = await storage.markDayComplete(userId, dayNumber);
+      res.json(progress);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark day complete" });
     }
   });
 

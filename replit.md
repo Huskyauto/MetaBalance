@@ -49,6 +49,21 @@ The Emotional Wellness tab helps users understand and manage emotional eating:
 - Track usage frequency
 - Favorite strategies
 
+### 5-Day Workshop Feature
+Based on Lisa Goldberg's "Crack the Code to Stop Emotional Eating" program:
+
+**Day 1: Nourish** - Learn to fuel your body with healthy, balanced meals
+**Day 2: Awareness** - Develop awareness of habits and behaviors
+**Day 3: Messaging** - Transform negative self-talk into positive affirmations
+**Day 4: Triggers** - Identify emotional eating triggers and strategies
+**Day 5: New Story** - Rewrite your mental script for lasting change
+
+Features:
+- Lesson content with key points for each day
+- Interactive worksheets with exercise and reflection prompts
+- Progress tracking with day-by-day completion
+- Sequential unlocking (complete day 1 to unlock day 2, etc.)
+
 ## Authentication
 
 The app uses Replit Auth (OIDC) for authentication:
@@ -101,6 +116,7 @@ The app uses Replit Auth (OIDC) for authentication:
 │   │   ├── Fasting.tsx
 │   │   ├── Coach.tsx
 │   │   ├── EmotionalWellness.tsx
+│   │   ├── Workshop.tsx
 │   │   ├── Settings.tsx
 │   │   └── Research.tsx
 │   ├── hooks/

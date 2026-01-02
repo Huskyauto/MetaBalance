@@ -1,6 +1,6 @@
 import { 
   users, weightLogs, meals, fastingSessions, dailyGoals, streaks, chatMessages,
-  moodCheckIns, emotionalJournals, copingStrategies,
+  moodCheckIns, emotionalJournals, copingStrategies, workshopProgress,
   type User, type InsertUser, type UpsertUser,
   type WeightLog, type InsertWeightLog,
   type Meal, type InsertMeal,
@@ -10,7 +10,8 @@ import {
   type ChatMessage, type InsertChatMessage,
   type MoodCheckIn, type InsertMoodCheckIn,
   type EmotionalJournal, type InsertEmotionalJournal,
-  type CopingStrategy, type InsertCopingStrategy
+  type CopingStrategy, type InsertCopingStrategy,
+  type WorkshopProgress, type InsertWorkshopProgress
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
@@ -67,6 +68,12 @@ export interface IStorage {
   createCopingStrategy(strategy: InsertCopingStrategy): Promise<CopingStrategy>;
   updateCopingStrategy(id: string, data: Partial<InsertCopingStrategy>): Promise<CopingStrategy | undefined>;
   deleteCopingStrategy(id: string): Promise<void>;
+  
+  // Workshop Progress
+  getWorkshopProgress(userId: string): Promise<WorkshopProgress[]>;
+  getWorkshopProgressByDay(userId: string, dayNumber: number): Promise<WorkshopProgress | undefined>;
+  upsertWorkshopProgress(progress: InsertWorkshopProgress): Promise<WorkshopProgress>;
+  markDayComplete(userId: string, dayNumber: number): Promise<WorkshopProgress | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -310,6 +317,55 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCopingStrategy(id: string): Promise<void> {
     await db.delete(copingStrategies).where(eq(copingStrategies.id, id));
+  }
+
+  // Workshop Progress
+  async getWorkshopProgress(userId: string): Promise<WorkshopProgress[]> {
+    return db.select().from(workshopProgress)
+      .where(eq(workshopProgress.userId, userId))
+      .orderBy(workshopProgress.dayNumber);
+  }
+
+  async getWorkshopProgressByDay(userId: string, dayNumber: number): Promise<WorkshopProgress | undefined> {
+    const [progress] = await db.select().from(workshopProgress)
+      .where(and(eq(workshopProgress.userId, userId), eq(workshopProgress.dayNumber, dayNumber)));
+    return progress || undefined;
+  }
+
+  async upsertWorkshopProgress(progress: InsertWorkshopProgress): Promise<WorkshopProgress> {
+    const existing = await this.getWorkshopProgressByDay(progress.userId, progress.dayNumber);
+    
+    if (existing) {
+      const [updated] = await db.update(workshopProgress)
+        .set({
+          exerciseResponse: progress.exerciseResponse ?? existing.exerciseResponse,
+          reflectionResponse: progress.reflectionResponse ?? existing.reflectionResponse,
+          completed: progress.completed ?? existing.completed,
+        })
+        .where(eq(workshopProgress.id, existing.id))
+        .returning();
+      return updated;
+    }
+    
+    const [newProgress] = await db.insert(workshopProgress).values(progress).returning();
+    return newProgress;
+  }
+
+  async markDayComplete(userId: string, dayNumber: number): Promise<WorkshopProgress | undefined> {
+    const existing = await this.getWorkshopProgressByDay(userId, dayNumber);
+    
+    if (existing) {
+      const [updated] = await db.update(workshopProgress)
+        .set({ completed: true, completedAt: new Date() })
+        .where(eq(workshopProgress.id, existing.id))
+        .returning();
+      return updated;
+    }
+    
+    const [newProgress] = await db.insert(workshopProgress)
+      .values({ userId, dayNumber, completed: true, completedAt: new Date() })
+      .returning();
+    return newProgress;
   }
 }
 

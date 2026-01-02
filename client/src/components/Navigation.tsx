@@ -15,6 +15,7 @@ import {
   Timer,
   Bot,
   Heart,
+  GraduationCap,
   BookOpen,
   Settings,
   Menu,
@@ -38,6 +39,7 @@ const navItems = [
   { id: "fasting", label: "Fasting", icon: Timer },
   { id: "coach", label: "AI Coach", icon: Bot },
   { id: "wellness", label: "Wellness", icon: Heart },
+  { id: "workshop", label: "Workshop", icon: GraduationCap },
   { id: "research", label: "Research", icon: BookOpen },
   { id: "settings", label: "Settings", icon: Settings },
 ];
