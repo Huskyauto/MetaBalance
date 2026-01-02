@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertWeightLogSchema, insertMealSchema, 
-  insertFastingSessionSchema, insertChatMessageSchema 
+  insertFastingSessionSchema, insertChatMessageSchema,
+  insertMoodCheckInSchema, insertEmotionalJournalSchema, insertCopingStrategySchema
 } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
@@ -521,6 +522,120 @@ Keep responses concise (2-3 sentences max) and actionable. Be warm but professio
     } catch (error) {
       console.error("Food search error:", error);
       res.status(500).json({ error: "Failed to search food" });
+    }
+  });
+
+  // ============ Emotional Wellness Routes ============
+  
+  // Mood Check-ins
+  app.get("/api/mood-checkins", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = req.query.date as string;
+      if (date) {
+        const checkIns = await storage.getMoodCheckInsByDate(userId, date);
+        return res.json(checkIns);
+      }
+      const limit = parseInt(req.query.limit as string) || 50;
+      const checkIns = await storage.getMoodCheckIns(userId, limit);
+      res.json(checkIns);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get mood check-ins" });
+    }
+  });
+
+  app.post("/api/mood-checkins", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const data = insertMoodCheckInSchema.parse({ ...req.body, userId });
+      const checkIn = await storage.createMoodCheckIn(data);
+      res.json(checkIn);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create mood check-in" });
+    }
+  });
+
+  // Emotional Journals
+  app.get("/api/emotional-journals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const journals = await storage.getEmotionalJournals(userId, limit);
+      res.json(journals);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get emotional journals" });
+    }
+  });
+
+  app.post("/api/emotional-journals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const data = insertEmotionalJournalSchema.parse({ ...req.body, userId });
+      const journal = await storage.createEmotionalJournal(data);
+      res.json(journal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create emotional journal" });
+    }
+  });
+
+  app.delete("/api/emotional-journals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteEmotionalJournal(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete emotional journal" });
+    }
+  });
+
+  // Coping Strategies
+  app.get("/api/coping-strategies", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const strategies = await storage.getCopingStrategies(userId);
+      res.json(strategies);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get coping strategies" });
+    }
+  });
+
+  app.post("/api/coping-strategies", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const data = insertCopingStrategySchema.parse({ ...req.body, userId });
+      const strategy = await storage.createCopingStrategy(data);
+      res.json(strategy);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create coping strategy" });
+    }
+  });
+
+  app.patch("/api/coping-strategies/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const updated = await storage.updateCopingStrategy(req.params.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Coping strategy not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update coping strategy" });
+    }
+  });
+
+  app.delete("/api/coping-strategies/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteCopingStrategy(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete coping strategy" });
     }
   });
 

@@ -1,12 +1,16 @@
 import { 
   users, weightLogs, meals, fastingSessions, dailyGoals, streaks, chatMessages,
+  moodCheckIns, emotionalJournals, copingStrategies,
   type User, type InsertUser, type UpsertUser,
   type WeightLog, type InsertWeightLog,
   type Meal, type InsertMeal,
   type FastingSession, type InsertFastingSession,
   type DailyGoal, type InsertDailyGoal,
   type Streak, type InsertStreak,
-  type ChatMessage, type InsertChatMessage
+  type ChatMessage, type InsertChatMessage,
+  type MoodCheckIn, type InsertMoodCheckIn,
+  type EmotionalJournal, type InsertEmotionalJournal,
+  type CopingStrategy, type InsertCopingStrategy
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
@@ -47,6 +51,22 @@ export interface IStorage {
   getChatMessages(userId: string, limit?: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   clearChatHistory(userId: string): Promise<void>;
+  
+  // Mood Check-ins
+  getMoodCheckIns(userId: string, limit?: number): Promise<MoodCheckIn[]>;
+  getMoodCheckInsByDate(userId: string, date: string): Promise<MoodCheckIn[]>;
+  createMoodCheckIn(checkIn: InsertMoodCheckIn): Promise<MoodCheckIn>;
+  
+  // Emotional Journals
+  getEmotionalJournals(userId: string, limit?: number): Promise<EmotionalJournal[]>;
+  createEmotionalJournal(journal: InsertEmotionalJournal): Promise<EmotionalJournal>;
+  deleteEmotionalJournal(id: string): Promise<void>;
+  
+  // Coping Strategies
+  getCopingStrategies(userId: string): Promise<CopingStrategy[]>;
+  createCopingStrategy(strategy: InsertCopingStrategy): Promise<CopingStrategy>;
+  updateCopingStrategy(id: string, data: Partial<InsertCopingStrategy>): Promise<CopingStrategy | undefined>;
+  deleteCopingStrategy(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -230,6 +250,66 @@ export class DatabaseStorage implements IStorage {
 
   async clearChatHistory(userId: string): Promise<void> {
     await db.delete(chatMessages).where(eq(chatMessages.userId, userId));
+  }
+
+  // Mood Check-ins
+  async getMoodCheckIns(userId: string, limit = 50): Promise<MoodCheckIn[]> {
+    return db.select().from(moodCheckIns)
+      .where(eq(moodCheckIns.userId, userId))
+      .orderBy(desc(moodCheckIns.createdAt))
+      .limit(limit);
+  }
+
+  async getMoodCheckInsByDate(userId: string, date: string): Promise<MoodCheckIn[]> {
+    return db.select().from(moodCheckIns)
+      .where(and(eq(moodCheckIns.userId, userId), eq(moodCheckIns.date, date)))
+      .orderBy(moodCheckIns.time);
+  }
+
+  async createMoodCheckIn(checkIn: InsertMoodCheckIn): Promise<MoodCheckIn> {
+    const [newCheckIn] = await db.insert(moodCheckIns).values(checkIn).returning();
+    return newCheckIn;
+  }
+
+  // Emotional Journals
+  async getEmotionalJournals(userId: string, limit = 50): Promise<EmotionalJournal[]> {
+    return db.select().from(emotionalJournals)
+      .where(eq(emotionalJournals.userId, userId))
+      .orderBy(desc(emotionalJournals.createdAt))
+      .limit(limit);
+  }
+
+  async createEmotionalJournal(journal: InsertEmotionalJournal): Promise<EmotionalJournal> {
+    const [newJournal] = await db.insert(emotionalJournals).values(journal).returning();
+    return newJournal;
+  }
+
+  async deleteEmotionalJournal(id: string): Promise<void> {
+    await db.delete(emotionalJournals).where(eq(emotionalJournals.id, id));
+  }
+
+  // Coping Strategies
+  async getCopingStrategies(userId: string): Promise<CopingStrategy[]> {
+    return db.select().from(copingStrategies)
+      .where(eq(copingStrategies.userId, userId))
+      .orderBy(desc(copingStrategies.isFavorite), copingStrategies.name);
+  }
+
+  async createCopingStrategy(strategy: InsertCopingStrategy): Promise<CopingStrategy> {
+    const [newStrategy] = await db.insert(copingStrategies).values(strategy).returning();
+    return newStrategy;
+  }
+
+  async updateCopingStrategy(id: string, data: Partial<InsertCopingStrategy>): Promise<CopingStrategy | undefined> {
+    const [updated] = await db.update(copingStrategies)
+      .set(data)
+      .where(eq(copingStrategies.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteCopingStrategy(id: string): Promise<void> {
+    await db.delete(copingStrategies).where(eq(copingStrategies.id, id));
   }
 }
 
