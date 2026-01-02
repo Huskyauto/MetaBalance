@@ -17,11 +17,37 @@ MetaBalance is a comprehensive health tracking application that helps users mana
 - Dietary tracking page with Spoonacular food search API
 - Fasting timer with multiple protocols
 - AI coach chat interface (OpenAI integration)
+- **Emotional Wellness** - Emotional eating support with mood check-ins, journaling, and coping strategies
 - Research hub with health articles
 - Dark/light theme toggle (light mode default)
 - Responsive navigation with user profile dropdown
 - Settings page for user profile and goals
+- Auto-calculate nutrition targets based on stats (Mifflin-St Jeor formula)
 - PostgreSQL database with Drizzle ORM
+
+### Emotional Wellness Feature
+The Emotional Wellness tab helps users understand and manage emotional eating:
+
+**Mood Check-in Tab:**
+- Select current mood (stressed, anxious, sad, bored, lonely, tired, angry, overwhelmed, happy, neutral)
+- Rate emotional intensity (1-10)
+- Assess actual hunger level (1-10) to distinguish physical vs emotional hunger
+- Identify triggers (work stress, family issues, boredom, etc.)
+- Context tracking (before eating, during craving, after eating)
+- Recent check-ins history
+
+**Journal Tab:**
+- Reflective journaling with prompts
+- Entry types: reflection, breakthrough, challenge, gratitude, pattern insight
+- Built-in prompts to guide self-exploration
+- Full journal history with delete capability
+
+**Coping Toolbox Tab:**
+- Personal collection of healthy coping strategies
+- Categories: physical, mental, social, creative, self-care
+- Default strategy suggestions to get started
+- Track usage frequency
+- Favorite strategies
 
 ## Authentication
 
@@ -74,6 +100,8 @@ The app uses Replit Auth (OIDC) for authentication:
 │   │   ├── Progress.tsx
 │   │   ├── Fasting.tsx
 │   │   ├── Coach.tsx
+│   │   ├── EmotionalWellness.tsx
+│   │   ├── Settings.tsx
 │   │   └── Research.tsx
 │   ├── hooks/
 │   ├── lib/

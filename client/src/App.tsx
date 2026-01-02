@@ -10,6 +10,7 @@ import { DietaryTracking } from "@/pages/DietaryTracking";
 import { Progress } from "@/pages/Progress";
 import { Fasting } from "@/pages/Fasting";
 import { Coach } from "@/pages/Coach";
+import { EmotionalWellness } from "@/pages/EmotionalWellness";
 import { Research } from "@/pages/Research";
 import Settings from "@/pages/Settings";
 import { Landing } from "@/pages/Landing";
@@ -30,6 +31,8 @@ function AuthenticatedApp() {
         return <Fasting />;
       case "coach":
         return <Coach />;
+      case "wellness":
+        return <EmotionalWellness />;
       case "research":
         return <Research />;
       case "settings":
@@ -45,7 +48,7 @@ function AuthenticatedApp() {
       <main className="container mx-auto max-w-7xl px-4 py-6">
         {renderPage()}
       </main>
-      {currentPage !== "coach" && <QuickActions />}
+      {currentPage !== "coach" && currentPage !== "wellness" && <QuickActions />}
     </div>
   );
 }
