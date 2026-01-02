@@ -703,6 +703,30 @@ function CopingToolboxSection() {
                   </div>
                 );
               })}
+              
+              {strategies.length < 5 && (
+                <div className="mt-6 pt-4 border-t">
+                  <p className="text-sm text-muted-foreground mb-3">Quick add more strategies:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {DEFAULT_COPING_STRATEGIES
+                      .filter(d => !strategies.some(s => s.name.toLowerCase() === d.name.toLowerCase()))
+                      .slice(0, 4)
+                      .map((strategy) => (
+                        <Button
+                          key={strategy.name}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addDefaultStrategy.mutate(strategy)}
+                          disabled={addDefaultStrategy.isPending}
+                          data-testid={`button-quick-add-${strategy.name.replace(/\s+/g, '-').toLowerCase()}`}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          {strategy.name}
+                        </Button>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-6">
