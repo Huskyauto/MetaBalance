@@ -27,7 +27,7 @@ const MOODS = [
   { value: "lonely", label: "Lonely", icon: Heart, color: "text-purple-500" },
   { value: "tired", label: "Tired", icon: Clock, color: "text-slate-500" },
   { value: "angry", label: "Angry", icon: AlertCircle, color: "text-red-500" },
-  { value: "overwhelmed", label: "Overwhelmed", icon: Brain, color: "text-pink-500" },
+  { value: "overwhelmed", label: "Over-whelmed", icon: Brain, color: "text-pink-500" },
   { value: "happy", label: "Happy", icon: Smile, color: "text-green-500" },
   { value: "neutral", label: "Neutral", icon: Meh, color: "text-muted-foreground" },
 ];
@@ -136,7 +136,7 @@ function MoodCheckInSection() {
                   data-testid={`button-mood-${mood.value}`}
                 >
                   <Icon className={`h-5 w-5 flex-shrink-0 ${selectedMood !== mood.value ? mood.color : ""}`} />
-                  <span className="text-xs truncate w-full text-center">{mood.label}</span>
+                  <span className="text-xs text-center leading-tight break-words">{mood.label}</span>
                 </Button>
               );
             })}
