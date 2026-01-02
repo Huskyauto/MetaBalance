@@ -352,11 +352,11 @@ function JournalSection() {
                   New Entry
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg">
+              <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
                 <DialogHeader>
                   <DialogTitle>Write a Journal Entry</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 pt-4">
+                <div className="space-y-4 pt-4 overflow-y-auto flex-1">
                   <div className="space-y-2">
                     <Label>Entry Type</Label>
                     <Select value={journalType} onValueChange={setJournalType}>
@@ -410,11 +410,13 @@ function JournalSection() {
                       placeholder="Write freely about what you're experiencing..."
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      className="min-h-[150px]"
+                      className="min-h-[120px]"
                       data-testid="textarea-journal-content"
                     />
                   </div>
+                </div>
 
+                <div className="pt-4 border-t mt-2">
                   <Button 
                     className="w-full" 
                     onClick={() => createJournal.mutate()}
