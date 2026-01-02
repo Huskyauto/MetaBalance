@@ -124,19 +124,19 @@ function MoodCheckInSection() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {MOODS.map((mood) => {
               const Icon = mood.icon;
               return (
                 <Button
                   key={mood.value}
                   variant={selectedMood === mood.value ? "default" : "outline"}
-                  className="flex flex-col h-auto py-3 gap-1"
+                  className="flex flex-col h-auto py-3 gap-1 min-w-0"
                   onClick={() => setSelectedMood(mood.value)}
                   data-testid={`button-mood-${mood.value}`}
                 >
-                  <Icon className={`h-5 w-5 ${selectedMood !== mood.value ? mood.color : ""}`} />
-                  <span className="text-xs">{mood.label}</span>
+                  <Icon className={`h-5 w-5 flex-shrink-0 ${selectedMood !== mood.value ? mood.color : ""}`} />
+                  <span className="text-xs truncate w-full text-center">{mood.label}</span>
                 </Button>
               );
             })}
