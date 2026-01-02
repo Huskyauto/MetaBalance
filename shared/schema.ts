@@ -160,6 +160,69 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   }),
 }));
 
+// Emotional wellness - mood check-ins
+export const moodCheckIns = pgTable("mood_check_ins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  mood: text("mood").notNull(), // stressed, anxious, sad, bored, lonely, tired, happy, neutral, angry, overwhelmed
+  intensity: integer("intensity").notNull(), // 1-10 scale
+  hungerLevel: integer("hunger_level"), // 1-10 (1=not hungry, 10=very hungry)
+  context: text("context"), // before_eating, during_craving, after_eating, general
+  triggers: text("triggers").array(), // what triggered this emotional state
+  copingUsed: text("coping_used").array(), // coping strategies used
+  notes: text("notes"),
+  date: date("date").notNull(),
+  time: text("time"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const moodCheckInsRelations = relations(moodCheckIns, ({ one }) => ({
+  user: one(users, {
+    fields: [moodCheckIns.userId],
+    references: [users.id],
+  }),
+}));
+
+// Emotional wellness - journal entries for reflection
+export const emotionalJournals = pgTable("emotional_journals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // reflection, breakthrough, challenge, gratitude, pattern_insight
+  title: text("title"),
+  content: text("content").notNull(),
+  mood: text("mood"),
+  tags: text("tags").array(),
+  date: date("date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const emotionalJournalsRelations = relations(emotionalJournals, ({ one }) => ({
+  user: one(users, {
+    fields: [emotionalJournals.userId],
+    references: [users.id],
+  }),
+}));
+
+// Coping strategies tracking - what works for the user
+export const copingStrategies = pgTable("coping_strategies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // physical, mental, social, creative, self-care
+  description: text("description"),
+  timesUsed: integer("times_used").default(0),
+  effectiveness: integer("effectiveness"), // 1-5 rating
+  isFavorite: boolean("is_favorite").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const copingStrategiesRelations = relations(copingStrategies, ({ one }) => ({
+  user: one(users, {
+    fields: [copingStrategies.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ createdAt: true, updatedAt: true });
 export const insertWeightLogSchema = createInsertSchema(weightLogs).omit({ id: true, createdAt: true });
@@ -177,6 +240,9 @@ export const insertFastingSessionSchema = createInsertSchema(fastingSessions).om
 export const insertDailyGoalSchema = createInsertSchema(dailyGoals).omit({ id: true, createdAt: true });
 export const insertStreakSchema = createInsertSchema(streaks).omit({ id: true, createdAt: true });
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({ id: true, createdAt: true });
+export const insertMoodCheckInSchema = createInsertSchema(moodCheckIns).omit({ id: true, createdAt: true });
+export const insertEmotionalJournalSchema = createInsertSchema(emotionalJournals).omit({ id: true, createdAt: true });
+export const insertCopingStrategySchema = createInsertSchema(copingStrategies).omit({ id: true, createdAt: true });
 
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -199,3 +265,12 @@ export type Streak = typeof streaks.$inferSelect;
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+
+export type InsertMoodCheckIn = z.infer<typeof insertMoodCheckInSchema>;
+export type MoodCheckIn = typeof moodCheckIns.$inferSelect;
+
+export type InsertEmotionalJournal = z.infer<typeof insertEmotionalJournalSchema>;
+export type EmotionalJournal = typeof emotionalJournals.$inferSelect;
+
+export type InsertCopingStrategy = z.infer<typeof insertCopingStrategySchema>;
+export type CopingStrategy = typeof copingStrategies.$inferSelect;
