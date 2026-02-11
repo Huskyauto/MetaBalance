@@ -978,3 +978,32 @@ export async function getUserStats(userId: number) {
     return null;
   }
 }
+
+
+// ===== TEST UTILITIES =====
+
+export async function deleteTestDailyGoals(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(dailyGoals).where(
+    and(
+      eq(dailyGoals.userId, userId),
+      gte(dailyGoals.date, startDate),
+      lte(dailyGoals.date, endDate)
+    )
+  );
+}
+
+export async function deleteTestWeeklyReflections(userId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(weeklyReflections).where(
+    and(
+      eq(weeklyReflections.userId, userId),
+      gte(weeklyReflections.weekStartDate, startDate),
+      lte(weeklyReflections.weekStartDate, endDate)
+    )
+  );
+}

@@ -80,3 +80,12 @@
 - [ ] Trigger-Response Library
 - [ ] AI Coach Enhancement for emotional eating
 - [ ] 90lb Journey Integration
+
+
+## Bug Fixes (Feb 10, 2026)
+- [x] Fix failing tests caused by stale database records
+  - [x] Investigated test failures (winScore returning wrong values)
+  - [x] Root cause: Previous test runs left data in database
+  - [x] Added deleteTestDailyGoals() and deleteTestWeeklyReflections() cleanup functions
+  - [x] Added beforeEach hook to clean test data before each test
+  - [x] All 55 tests now passing (100% pass rate)

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 import * as db from "./db";
 
 describe("Daily Goals & Weekly Reflections", () => {
@@ -28,6 +28,14 @@ describe("Daily Goals & Weekly Reflections", () => {
     const user = await db.getUserByOpenId('test-goals-user-999999');
     if (!user) throw new Error('Failed to create test user');
     testUserId = user.id;
+  });
+  
+  beforeEach(async () => {
+    // Clean up any existing test data from previous runs
+    const startDate = getTestDate(0);
+    const endDate = getTestDate(1000);
+    await db.deleteTestDailyGoals(testUserId, startDate, endDate);
+    await db.deleteTestWeeklyReflections(testUserId, startDate, endDate);
   });
 
   describe("Daily Goals", () => {
